@@ -1,0 +1,136 @@
+<div class="modal-overlay" *ngIf="isOpen()" (click)="close()">
+  <div class="modal-container" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2 class="modal-title">Register New Agent</h2>
+      <button class="close-btn" (click)="close()" aria-label="Close dialog" type="button">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="close-icon">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+        </svg>
+      </button>
+    </div>
+
+    <div class="modal-body">
+      <form class="form-grid" #agentForm="ngForm" (ngSubmit)="register()">
+        <!-- Agent Name -->
+        <div class="form-group">
+          <label class="form-label" for="agent-name">Agent Name *</label>
+          <input type="text" 
+                 id="agent-name" 
+                 name="name"
+                 [(ngModel)]="name" 
+                 placeholder="e.g. sample agent" 
+                 class="form-input" 
+                 required 
+                 #nameField="ngModel"
+                 [class.invalid]="nameField.invalid && nameField.touched" />
+          <span class="error-text" *ngIf="nameField.invalid && nameField.touched">Name is required.</span>
+        </div>
+
+        <!-- Agent Type -->
+        <div class="form-group">
+          <label class="form-label" for="agent-type">Agent Type *</label>
+          <select id="agent-type" name="agentType" [(ngModel)]="agentType" class="form-input">
+            <option value="A2A">A2A</option>
+            <option value="Assistant">Assistant</option>
+            <option value="Router">Router</option>
+            <option value="Plugin">Plugin</option>
+          </select>
+        </div>
+
+        <!-- Agent Endpoint URL -->
+        <div class="form-group">
+          <label class="form-label" for="agent-url">Agent Endpoint URL</label>
+          <input type="url" 
+                 id="agent-url" 
+                 name="agentUrl"
+                 [(ngModel)]="agentUrl" 
+                 placeholder="e.g. https://api.agent.dev" 
+                 class="form-input"
+                 #urlField="ngModel"
+                 [class.invalid]="urlField.invalid && urlField.touched" />
+          <span class="error-text" *ngIf="urlField.invalid && urlField.touched">Please enter a valid URL.</span>
+        </div>
+
+        <!-- Git Repository -->
+        <div class="form-group">
+          <label class="form-label" for="agent-git">Git Repository URL</label>
+          <input type="url" 
+                 id="agent-git" 
+                 name="gitRepo"
+                 [(ngModel)]="gitRepo" 
+                 placeholder="e.g. https://github.com/user/repo" 
+                 class="form-input"
+                 #gitField="ngModel"
+                 [class.invalid]="gitField.invalid && gitField.touched" />
+          <span class="error-text" *ngIf="gitField.invalid && gitField.touched">Please enter a valid Git URL.</span>
+        </div>
+
+        <!-- Description -->
+        <div class="form-group full-width">
+          <label class="form-label" for="agent-desc">Description</label>
+          <textarea id="agent-desc" 
+                    name="description"
+                    [(ngModel)]="description" 
+                    placeholder="Briefly describe the agent's responsibilities..." 
+                    class="form-textarea" 
+                    rows="3"></textarea>
+        </div>
+
+        <!-- Auth Modes -->
+        <div class="form-group">
+          <label class="form-label" for="agent-auth">Auth Mode</label>
+          <select id="agent-auth" name="authMode" [(ngModel)]="authMode" class="form-input">
+            <option value="None">None</option>
+            <option value="API Key">API Key</option>
+            <option value="Bearer Token">Bearer Token</option>
+            <option value="OAuth2">OAuth2</option>
+          </select>
+        </div>
+
+        <!-- Visibility (Public / Private) -->
+        <div class="form-group">
+          <label class="form-label" for="agent-visibility">Visibility</label>
+          <select id="agent-visibility" name="visibility" [(ngModel)]="visibility" class="form-input">
+            <option value="public">Public</option>
+            <option value="private">Private</option>
+          </select>
+        </div>
+
+        <!-- Docs Link -->
+        <div class="form-group">
+          <label class="form-label" for="agent-docs">Documentation URL</label>
+          <input type="url" 
+                 id="agent-docs" 
+                 name="docsLink"
+                 [(ngModel)]="docsLink" 
+                 placeholder="e.g. https://docs.agent.dev" 
+                 class="form-input"
+                 #docsField="ngModel"
+                 [class.invalid]="docsField.invalid && docsField.touched" />
+          <span class="error-text" *ngIf="docsField.invalid && docsField.touched">Please enter a valid URL.</span>
+        </div>
+
+        <!-- Tags Input -->
+        <div class="form-group">
+          <label class="form-label" for="agent-tags">Tags (Comma-separated)</label>
+          <input type="text" 
+                 id="agent-tags" 
+                 name="tagsInput"
+                 [(ngModel)]="tagsInput" 
+                 placeholder="e.g. Read File, Code Review" 
+                 class="form-input" />
+        </div>
+      </form>
+    </div>
+
+    <div class="modal-footer">
+      <button class="cancel-btn" (click)="close()" type="button">Cancel</button>
+      <button class="register-btn" 
+              (click)="register()" 
+              [disabled]="agentForm.invalid || !name.trim()" 
+              type="button">
+        Register Agent
+      </button>
+    </div>
+  </div>
+</div>

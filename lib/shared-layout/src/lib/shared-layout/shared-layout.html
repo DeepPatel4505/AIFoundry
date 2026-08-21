@@ -1,0 +1,11 @@
+<lib-shared-header></lib-shared-header>
+<div class="layout-body">
+  <lib-shared-sidebar [isCollapsed]="isSidebarCollapsed" (collapseChange)="onSidebarCollapseChange($event)"></lib-shared-sidebar>
+  <main class="layout-main">
+    <div class="layout-container">
+      <router-outlet></router-outlet>
+    </div>
+  </main>
+</div>
+
+

@@ -1,0 +1,330 @@
+/* Sidebar Component Styling */
+:host {
+  --sidebar-expanded-width: 260px;
+  --sidebar-collapsed-width: 78px;
+  --bg-sidebar: rgba(10, 15, 30, 0.45);
+  --border-sidebar: rgba(255, 255, 255, 0.06);
+  --accent-indigo: #6366f1;
+  --accent-purple: #a855f7;
+  --accent-glow: rgba(99, 102, 241, 0.15);
+  --text-main: #f1f5f9;
+  --text-muted: #64748b;
+  --text-hover: #ffffff;
+  --radius-md: 10px;
+  --transition-sidebar: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-submenu: max-height 0.45s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease;
+  --transition-element: all 0.2s ease;
+  
+  height: 100%;
+  display: flex;
+}
+
+.sidebar {
+  width: var(--sidebar-expanded-width);
+  height: 100%;
+  background: var(--bg-sidebar);
+  border-right: 1px solid var(--border-sidebar);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  box-sizing: border-box;
+  transition: var(--transition-sidebar);
+  overflow: hidden;
+}
+
+.sidebar.collapsed {
+  width: var(--sidebar-collapsed-width);
+}
+
+.sidebar-content {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 20px 14px;
+}
+
+/* Scrollbar tweaks */
+.sidebar-content::-webkit-scrollbar {
+  width: 4px;
+}
+.sidebar-content::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 4px;
+}
+
+/* Nav Menu Styling */
+.sidebar-nav {
+  width: 100%;
+}
+
+.nav-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.nav-item {
+  position: relative;
+  width: 100%;
+}
+
+.nav-link {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  padding: 12px;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: var(--radius-md);
+  color: var(--text-muted);
+  cursor: pointer;
+  outline: none;
+  font-family: inherit;
+  font-weight: 500;
+  font-size: 0.9rem;
+  transition: var(--transition-element);
+  box-sizing: border-box;
+  text-align: left;
+  white-space: nowrap;
+  text-decoration: none;
+}
+
+
+.nav-link:hover, 
+.nav-link:focus-visible {
+  color: var(--text-hover);
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.nav-icon {
+  width: 22px;
+  height: 22px;
+  flex-shrink: 0;
+  color: inherit;
+  transition: var(--transition-element);
+}
+
+.nav-link:hover .nav-icon,
+.nav-link:focus-visible .nav-icon {
+  color: var(--accent-indigo);
+  filter: drop-shadow(0 0 4px rgba(99, 102, 241, 0.5));
+}
+
+.nav-label {
+  margin-left: 14px;
+  opacity: 1;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  transform: translateX(0);
+}
+
+/* Collapsed Nav States */
+.sidebar.collapsed .nav-label {
+  opacity: 0;
+  transform: translateX(-10px);
+  pointer-events: none;
+  display: inline-block;
+  width: 0;
+  overflow: hidden;
+  margin-left: 0;
+}
+
+/* Active Nav Links */
+.nav-link.active {
+  color: var(--text-main);
+  background: linear-gradient(90deg, rgba(99, 102, 241, 0.1) 0%, rgba(99, 102, 241, 0.02) 100%);
+  border-left: 3px solid var(--accent-indigo);
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+}
+
+.nav-link.active .nav-icon {
+  color: var(--accent-indigo);
+}
+
+.nav-link.group-active {
+  color: var(--text-main);
+}
+
+.nav-link.group-active .nav-icon {
+  color: var(--accent-purple);
+}
+
+/* Accordion Accordion-Chevron */
+.submenu-chevron {
+  width: 16px;
+  height: 16px;
+  margin-left: auto;
+  color: var(--text-muted);
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.2s ease;
+}
+
+.submenu-chevron.rotated {
+  transform: rotate(90deg);
+  color: var(--accent-purple);
+}
+
+.sidebar.collapsed .submenu-chevron {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Accordion Submenu Slide Transition Wrapper */
+.submenu-wrapper {
+  max-height: 0;
+  opacity: 0;
+  overflow: hidden;
+  transition: var(--transition-submenu);
+  margin-left: 24px;
+}
+
+.submenu-wrapper.expanded {
+  max-height: 250px;
+  opacity: 1;
+}
+
+.sidebar.collapsed .submenu-wrapper {
+  max-height: 0;
+  opacity: 0;
+}
+
+/* Submenu Items styling */
+.submenu-list {
+  list-style: none;
+  padding: 6px 0 0 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  border-left: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.submenu-item {
+  width: 100%;
+}
+
+.submenu-link {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  padding: 8px 12px;
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-md);
+  color: var(--text-muted);
+  cursor: pointer;
+  outline: none;
+  font-family: inherit;
+  font-weight: 500;
+  font-size: 0.85rem;
+  transition: var(--transition-element);
+  box-sizing: border-box;
+  text-align: left;
+  white-space: nowrap;
+  text-decoration: none;
+}
+
+
+.submenu-link:hover, 
+.submenu-link:focus-visible {
+  color: var(--text-hover);
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.submenu-icon {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  color: inherit;
+  transition: var(--transition-element);
+}
+
+.submenu-link:hover .submenu-icon,
+.submenu-link:focus-visible .submenu-icon {
+  color: var(--accent-purple);
+}
+
+.submenu-label {
+  margin-left: 12px;
+  opacity: 1;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.submenu-link.active {
+  color: var(--text-main);
+  background: rgba(168, 85, 247, 0.08);
+}
+
+.submenu-link.active .submenu-icon {
+  color: var(--accent-purple);
+  filter: drop-shadow(0 0 3px rgba(168, 85, 247, 0.4));
+}
+
+/* Sidebar Footer (Collapse toggle button) */
+.sidebar-footer {
+  padding: 14px;
+  border-top: 1px solid var(--border-sidebar);
+}
+
+.collapse-toggle {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  padding: 12px;
+  background: rgba(255, 255, 255, 0.01);
+  border: 1px solid rgba(255, 255, 255, 0.03);
+  border-radius: var(--radius-md);
+  color: var(--text-muted);
+  cursor: pointer;
+  outline: none;
+  font-family: inherit;
+  font-weight: 500;
+  font-size: 0.9rem;
+  transition: var(--transition-element);
+  box-sizing: border-box;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.collapse-toggle:hover, 
+.collapse-toggle:focus-visible {
+  color: var(--text-hover);
+  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(255, 255, 255, 0.06);
+}
+
+.collapse-icon {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  color: inherit;
+  transition: transform 0.3s ease;
+}
+
+.collapse-icon.rotated {
+  transform: rotate(180deg);
+}
+
+.collapse-label {
+  margin-left: 14px;
+  opacity: 1;
+  transition: opacity 0.2s ease;
+}
+
+/* Collapsed Footer State */
+.sidebar.collapsed .collapse-label {
+  opacity: 0;
+  pointer-events: none;
+  display: inline-block;
+  width: 0;
+  overflow: hidden;
+  margin-left: 0;
+}
+@media (max-width: 768px) {
+  :host {
+    position: absolute;
+    z-index: 999;
+  }
+}

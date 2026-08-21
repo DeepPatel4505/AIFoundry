@@ -1,0 +1,82 @@
+<div class="agent-card" [class.error-card]="agent.status === 'needs_attention'">
+  <!-- Top header row of the card -->
+  <div class="card-header">
+    <div class="identity-group">
+      <!-- Icon/avatar indicating agent node type -->
+      <div class="node-icon-wrapper">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="node-icon">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M21 7.5l-9-5.25L3 7.5m18 0l-9 5.25m9-5.25v9l-9 5.25M3 7.5l9 5.25M3 7.5v9l9 5.25" />
+        </svg>
+      </div>
+
+      <div class="title-badges">
+        <h3 class="agent-title">{{ agent.name }}</h3>
+        <div class="badges-row">
+          <!-- Active / Draft status pill -->
+          <span class="status-badge" [ngClass]="agent.status">
+            {{ agent.status === 'needs_attention' ? 'Attention' : (agent.status | titlecase) }}
+          </span>
+          <!-- Auth mode indicator pill if active -->
+          <span class="auth-badge" *ngIf="agent.authMode !== 'None'">
+            {{ agent.authMode }}
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Rating / Stars count -->
+    <div class="stars-counter" *ngIf="agent.stars > 0">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="star-icon">
+        <path fill-rule="evenodd" d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.006 5.404.434c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.434 2.082-5.005Z" clip-rule="evenodd" />
+      </svg>
+      <span class="stars-count">{{ agent.stars }}</span>
+    </div>
+  </div>
+
+  <!-- Description Body -->
+  <div class="card-body">
+    <p class="agent-description">{{ agent.description }}</p>
+
+    <!-- Tags list box matching layout -->
+    <div class="skills-block">
+      <div class="skills-header">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="lightning-icon">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75Z" />
+        </svg>
+        <span>Tags ({{ agent.tags.length }})</span>
+      </div>
+      <ul class="skills-bullets">
+        <li *ngFor="let tag of agent.tags" class="skill-bullet-item">{{ tag }}</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- Bottom footer row -->
+  <div class="card-footer">
+    <!-- Public / Private visibility marker -->
+    <div class="visibility-status">
+      <span class="vis-dot" [class.public]="agent.isPublic"></span>
+      <span class="vis-label">{{ agent.isPublic ? 'Public' : 'Private' }}</span>
+    </div>
+
+    <!-- Right Side Actions & Badges -->
+    <div class="footer-right">
+      <!-- Links: GitHub Repository / Documentation -->
+      <div class="links-group">
+        <a *ngIf="agent.gitRepo" [href]="agent.gitRepo" target="_blank" rel="noopener noreferrer" class="link-btn" title="Git Repository">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="link-icon">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M14.25 9.75L16.5 12l-2.25 2.25m-4.5 0L7.5 12l2.25-2.25M6 20.25h12A2.25 2.25 0 0 0 20.25 18V6A2.25 2.25 0 0 0 18 3.75H6A2.25 2.25 0 0 0 3.75 6v12A2.25 2.25 0 0 0 6 20.25Z" />
+          </svg>
+        </a>
+        <a *ngIf="agent.docsLink" [href]="agent.docsLink" target="_blank" rel="noopener noreferrer" class="link-btn" title="Documentation">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="link-icon">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 0 0 6 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 0 1 6 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 0 1 6-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0 0 18 18a8.967 8.967 0 0 0-6 2.292m0-14.25v14.25" />
+          </svg>
+        </a>
+      </div>
+
+      <!-- Agent type capability pill -->
+      <span class="category-pill">{{ agent.agentType }}</span>
+    </div>
+  </div>
+</div>

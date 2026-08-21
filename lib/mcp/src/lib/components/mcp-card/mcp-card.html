@@ -1,0 +1,20 @@
+<div class="mcp-card">
+  <div class="mcp-header">
+    <div>
+      <h3 class="mcp-name">{{ server.name }}</h3>
+      <code class="mcp-url">{{ server.url }}</code>
+    </div>
+    <span class="status-badge" [class.connected]="server.status === 'connected'">
+      {{ server.status }}
+    </span>
+  </div>
+
+  <p class="mcp-desc">{{ server.description }}</p>
+
+  <div class="mcp-capabilities">
+    <span class="cap-header">Exposed Tool Schemas:</span>
+    <div class="cap-tags">
+      <span class="cap-tag" *ngFor="let cap of server.capabilities">{{ cap }}</span>
+    </div>
+  </div>
+</div>

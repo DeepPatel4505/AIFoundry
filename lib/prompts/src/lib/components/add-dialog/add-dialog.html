@@ -1,0 +1,257 @@
+<div class="modal-overlay" *ngIf="isOpen()" (click)="close()">
+  <div class="modal-container" (click)="$event.stopPropagation()">
+    <!-- Header -->
+    <div class="modal-header">
+      <h2 class="modal-title">Register New Prompt</h2>
+      <button class="close-btn" (click)="close()" aria-label="Close dialog" type="button">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="close-icon">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+        </svg>
+      </button>
+    </div>
+
+    <!-- Stepper Indicator -->
+    <div class="stepper-bar">
+      <div class="stepper-indicator" [class.active]="currentStep === 1" [class.completed]="currentStep > 1">
+        <div class="indicator-badge">
+          <svg *ngIf="currentStep > 1" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="3" stroke="currentColor" class="badge-check">
+            <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />
+          </svg>
+          <span *ngIf="currentStep <= 1">1</span>
+        </div>
+        <span class="indicator-label">Basic Info</span>
+      </div>
+      <div class="stepper-divider" [class.active]="currentStep > 1"></div>
+      <div class="stepper-indicator" [class.active]="currentStep === 2" [class.completed]="currentStep > 2">
+        <div class="indicator-badge">
+          <svg *ngIf="currentStep > 2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="3" stroke="currentColor" class="badge-check">
+            <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />
+          </svg>
+          <span *ngIf="currentStep <= 2">2</span>
+        </div>
+        <span class="indicator-label">Content</span>
+      </div>
+      <div class="stepper-divider" [class.active]="currentStep > 2"></div>
+      <div class="stepper-indicator" [class.active]="currentStep === 3">
+        <div class="indicator-badge">
+          <span>3</span>
+        </div>
+        <span class="indicator-label">Settings</span>
+      </div>
+    </div>
+
+    <!-- Modal Body View -->
+    <div class="modal-body">
+      <!-- STEP 1: Basic Info -->
+      <div class="step-view" *ngIf="currentStep === 1">
+        <div class="form-grid">
+          <!-- Name -->
+          <div class="form-group">
+            <label class="form-label" for="prompt-name">Name *</label>
+            <input type="text" 
+                   id="prompt-name" 
+                   [(ngModel)]="name" 
+                   placeholder="e.g. Refactoring Advisor" 
+                   class="form-input" 
+                   required />
+          </div>
+
+          <!-- Description -->
+          <div class="form-group">
+            <label class="form-label" for="prompt-desc">Description</label>
+            <textarea id="prompt-desc" 
+                      [(ngModel)]="description" 
+                      placeholder="e.g. Checks inputs for code smells and suggests TypeScript improvements..." 
+                      class="form-textarea" 
+                      rows="3"></textarea>
+          </div>
+
+          <!-- Visibility -->
+          <div class="form-group">
+            <label class="form-label" for="prompt-visibility">Visibility</label>
+            <select id="prompt-visibility" [(ngModel)]="visibility" class="form-input">
+              <option value="public">Public</option>
+              <option value="private">Private</option>
+            </select>
+          </div>
+
+          <!-- Tags -->
+          <div class="form-group">
+            <label class="form-label" for="prompt-tags">Tags (Comma-separated)</label>
+            <input type="text" 
+                   id="prompt-tags" 
+                   [(ngModel)]="tagsInput" 
+                   placeholder="e.g. Development, Angular, Quality" 
+                   class="form-input" />
+          </div>
+        </div>
+      </div>
+
+      <!-- STEP 2: Content -->
+      <div class="step-view" *ngIf="currentStep === 2">
+        <div class="form-grid">
+          <!-- Textarea Header Row -->
+          <div class="box-header-row">
+            <div class="box-header-title">
+              <span class="form-label">Prompt Content *</span>
+              <p class="box-header-sub">Write your prompt template with variable placeholders</p>
+            </div>
+            <button type="button" class="insert-var-link" (click)="insertVariable()">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="plus-icon">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+              </svg>
+              Insert Variable
+            </button>
+          </div>
+
+          <!-- Template Area -->
+          <div class="form-group">
+            <textarea id="prompt-template" 
+                      [(ngModel)]="template" 
+                      (ngModelChange)="parseVariables()"
+                      [placeholder]="'Enter prompt template. Use {{variableName}} syntax to inject parameters...'" 
+                      class="form-textarea code-editor-style" 
+                      rows="6" 
+                      required></textarea>
+            <div class="textarea-metrics">
+              <span class="metric-label">{{ template.length }} characters</span>
+              <span class="metric-label">{{ detectedVars.length }} variables detected</span>
+            </div>
+          </div>
+
+          <!-- Variables List Input -->
+          <div class="detected-variables-section" *ngIf="detectedVars.length > 0">
+            <span class="section-label">Detected Variables</span>
+            <p class="section-sub">We found these variables in your prompt:</p>
+            <div class="variables-inputs-grid">
+              <div class="variable-row" *ngFor="let varObj of detectedVars">
+                <span class="var-badge">{{ '{{ ' + varObj.name + ' }}' }}</span>
+                <input type="text" 
+                       [(ngModel)]="varObj.description" 
+                       placeholder="Enter variable description..." 
+                       class="form-input var-desc-input" />
+              </div>
+            </div>
+          </div>
+
+          <!-- Changelog -->
+          <div class="form-group changelog-group">
+            <label class="form-label" for="prompt-changelog">Change Log</label>
+            <input type="text" 
+                   id="prompt-changelog" 
+                   [(ngModel)]="changeLog" 
+                   placeholder="e.g. Initial version" 
+                   class="form-input" />
+            <span class="field-hint-text">Describe what's in this version</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- STEP 3: Settings & Preview -->
+      <div class="step-view" *ngIf="currentStep === 3">
+        <div class="settings-preview-layout">
+          <!-- Settings Column -->
+          <div class="settings-column">
+            <div class="form-grid">
+              <!-- Model -->
+              <div class="form-group">
+                <label class="form-label" for="prompt-model">Recommended Model</label>
+                <select id="prompt-model" [(ngModel)]="model" class="form-input">
+                  <option value="Gemini 2.0 Flash">Gemini 2.0 Flash</option>
+                  <option value="Gemini 1.5 Pro">Gemini 1.5 Pro</option>
+                  <option value="Gemini 1.5 Flash">Gemini 1.5 Flash</option>
+                </select>
+              </div>
+
+              <!-- Max Tokens -->
+              <div class="form-group">
+                <label class="form-label" for="prompt-tokens">Max Tokens</label>
+                <input type="number" 
+                       id="prompt-tokens" 
+                       [(ngModel)]="maxTokens" 
+                       placeholder="2048" 
+                       class="form-input" />
+              </div>
+
+              <!-- Temperature -->
+              <div class="form-group">
+                <label class="form-label" for="prompt-temp">Temperature ({{ temperature }})</label>
+                <div class="slider-wrapper">
+                  <input type="range" 
+                         id="prompt-temp" 
+                         [(ngModel)]="temperature" 
+                         min="0" 
+                         max="2" 
+                         step="0.1" 
+                         class="form-range" />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Preview Card Column -->
+          <div class="preview-column">
+            <span class="preview-title-label">CARD PREVIEW</span>
+            
+            <div class="prompt-preview-card">
+              <div class="card-header">
+                <div class="title-badges">
+                  <h3 class="preview-card-title">{{ name || 'Untitled Prompt' }}</h3>
+                  <div class="badges-row">
+                    <span class="vis-indicator-badge" [class.public]="visibility === 'public'">
+                      {{ visibility | uppercase }}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="card-body">
+                <p class="preview-card-desc">{{ description || 'No description provided.' }}</p>
+                <div class="preview-tag-pills">
+                  <span class="preview-tag" *ngFor="let t of tagsInput.split(',')">{{ t.trim() }}</span>
+                </div>
+              </div>
+
+              <div class="card-footer">
+                <span class="vars-count-badge">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="code-bracket-icon">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M14.25 9.75L16.5 12l-2.25 2.25m-4.5 0L7.5 12l2.25-2.25" />
+                  </svg>
+                  Variables: {{ detectedVars.length }} detected
+                </span>
+                <span class="model-badge">{{ model }}</span>
+              </div>
+              <div class="content-hidden-hint">
+                <span>Prompt Content is hidden on card preview</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer Controls -->
+    <div class="modal-footer">
+      <button class="previous-btn" (click)="prevStep()" *ngIf="currentStep > 1" type="button">
+        Previous
+      </button>
+      <div class="footer-right-actions">
+        <button class="cancel-btn" (click)="close()" type="button">Cancel</button>
+        <button class="continue-btn" 
+                (click)="nextStep()" 
+                *ngIf="currentStep < 3" 
+                [disabled]="(currentStep === 1 && !name.trim()) || (currentStep === 2 && !template.trim())"
+                type="button">
+          Continue
+        </button>
+        <button class="register-btn" 
+                (click)="register()" 
+                *ngIf="currentStep === 3" 
+                [disabled]="!name.trim() || !template.trim()"
+                type="button">
+          Register
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

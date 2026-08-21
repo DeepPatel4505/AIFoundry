@@ -1,0 +1,144 @@
+/* Prompts Dashboard Page Styles */
+.registry-page {
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+}
+
+/* Header Row */
+.registry-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 32px;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+.registry-title {
+  font-size: 2.15rem;
+  font-weight: 750;
+  letter-spacing: -0.75px;
+  margin: 0 0 6px 0;
+  background: linear-gradient(135deg, #ffffff 0%, #cbd5e1 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.registry-subtitle {
+  color: #94a3b8;
+  font-size: 0.95rem;
+  margin: 0;
+}
+
+/* Actions Section */
+.actions-section {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.icon-action-btn {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #94a3b8;
+  cursor: pointer;
+  outline: none;
+  transition: all 0.2s;
+}
+
+.icon-action-btn:hover {
+  background: rgba(255, 255, 255, 0.03);
+  color: #f1f5f9;
+  border-color: rgba(255, 255, 255, 0.15);
+}
+
+.action-icon {
+  width: 20px;
+  height: 20px;
+}
+
+.register-main-btn {
+  background: #10b981;
+  border: none;
+  border-radius: 12px;
+  padding: 12px 20px;
+  color: #ffffff;
+  font-family: inherit;
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  outline: none;
+  transition: all 0.25s ease;
+  box-shadow: 0 4px 14px rgba(16, 185, 129, 0.3);
+}
+
+.register-main-btn:hover {
+  background: #059669;
+  box-shadow: 0 6px 20px rgba(16, 185, 129, 0.45);
+  transform: translateY(-1px);
+}
+
+.plus-icon {
+  width: 16px;
+  height: 16px;
+}
+
+/* Counter status bar */
+.counter-status-bar {
+  margin-bottom: 24px;
+  display: flex;
+  align-items: center;
+}
+
+.counter-indicator {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.circle-check-wrapper {
+  color: #34d399;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.check-icon {
+  width: 18px;
+  height: 18px;
+}
+
+.counter-text {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #94a3b8;
+}
+
+/* Grid Layout */
+.prompts-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 24px;
+  width: 100%;
+}
+
+@media (max-width: 640px) {
+  .registry-header-row {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .actions-section {
+    width: 100%;
+    justify-content: flex-start;
+  }
+}

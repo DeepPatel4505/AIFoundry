@@ -1,0 +1,98 @@
+<div class="modal-overlay" *ngIf="isOpen()" (click)="close()">
+  <div class="modal-container" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2 class="modal-title">Register Skill</h2>
+      <button class="close-btn" (click)="close()" aria-label="Close dialog" type="button">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="close-icon">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+        </svg>
+      </button>
+    </div>
+
+    <div class="modal-body">
+      <form class="form-grid" #skillForm="ngForm" (ngSubmit)="register()">
+        <!-- Name -->
+        <div class="form-group full-width">
+          <label class="form-label" for="skill-name">Name *</label>
+          <input type="text" 
+                 id="skill-name" 
+                 name="name"
+                 [(ngModel)]="name" 
+                 placeholder="e.g. Customer Support" 
+                 class="form-input" 
+                 required 
+                 #nameField="ngModel"
+                 [class.invalid]="nameField.invalid && nameField.touched" />
+          <span class="error-text" *ngIf="nameField.invalid && nameField.touched">Name is required.</span>
+        </div>
+
+        <!-- Description -->
+        <div class="form-group full-width">
+          <label class="form-label" for="skill-desc">Description</label>
+          <textarea id="skill-desc" 
+                    name="description"
+                    [(ngModel)]="description" 
+                    placeholder="e.g. Handles customer support conversations..." 
+                    class="form-textarea" 
+                    rows="2"></textarea>
+        </div>
+
+        <!-- Skill Category -->
+        <div class="form-group full-width">
+          <label class="form-label" for="skill-category">Category</label>
+          <select id="skill-category" name="category" [(ngModel)]="category" class="form-input">
+            <option value="tool">Tool</option>
+            <option value="logic">Logic</option>
+            <option value="api">API</option>
+          </select>
+        </div>
+
+        <!-- Skill Definition -->
+        <div class="form-group full-width">
+          <label class="form-label" for="skill-def">Skill Definition *</label>
+          <textarea id="skill-def" 
+                    name="definition"
+                    [(ngModel)]="definition" 
+                    placeholder="You are a customer support specialist..." 
+                    class="form-textarea code-style" 
+                    rows="5"
+                    required
+                    #defField="ngModel"
+                    [class.invalid]="defField.invalid && defField.touched"></textarea>
+          <span class="error-text" *ngIf="defField.invalid && defField.touched">Skill Definition is required.</span>
+        </div>
+
+        <!-- Import / Upload extra triggers -->
+        <div class="form-group full-width extra-actions">
+          <button type="button" class="action-trigger-btn" (click)="uploadSkill()">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="btn-icon">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
+            </svg>
+            Upload Skill
+          </button>
+          <button type="button" class="action-trigger-btn" (click)="importFromGit()">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="btn-icon">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M14.25 9.75L16.5 12l-2.25 2.25m-4.5 0L7.5 12l2.25-2.25M6 20.25h12A2.25 2.25 0 0 0 20.25 18V6A2.25 2.25 0 0 0 18 3.75H6A2.25 2.25 0 0 0 3.75 6v12A2.25 2.25 0 0 0 6 20.25Z" />
+            </svg>
+            Import from Git
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <div class="modal-footer">
+      <div class="validation-status-msg" *ngIf="isValidated">
+        <span class="status-indicator-dot"></span> Verified Valid
+      </div>
+      <div class="footer-actions">
+        <button class="validate-btn" (click)="validate()" [disabled]="!name.trim() || !definition.trim()" type="button">Validate</button>
+        <button class="register-btn" 
+                (click)="register()" 
+                [disabled]="skillForm.invalid || !name.trim() || !definition.trim()" 
+                type="button">
+          Register
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

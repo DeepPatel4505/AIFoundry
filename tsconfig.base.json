@@ -14,7 +14,14 @@
     "skipLibCheck": true,
     "skipDefaultLibCheck": true,
     "strict": false,
-    "paths": {}
+    "paths": {
+      "@web/shared-ui": ["./lib/shared-ui/src/index.ts"],
+      "@web/shared-layout": ["./lib/shared-layout/src/index.ts"],
+      "@web/agent": ["./lib/agent/src/index.ts"],
+      "@web/mcp": ["./lib/mcp/src/index.ts"],
+      "@web/skills": ["./lib/skills/src/index.ts"],
+      "@web/prompts": ["./lib/prompts/src/index.ts"]
+    }
   },
   "exclude": ["node_modules", "tmp"]
 }
