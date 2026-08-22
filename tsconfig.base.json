@@ -20,7 +20,8 @@
       "@web/agent": ["./lib/agent/src/index.ts"],
       "@web/mcp": ["./lib/mcp/src/index.ts"],
       "@web/skills": ["./lib/skills/src/index.ts"],
-      "@web/prompts": ["./lib/prompts/src/index.ts"]
+      "@web/prompts": ["./lib/prompts/src/index.ts"],
+      "@web/auth": ["./lib/auth/src/index.ts"]
     }
   },
   "exclude": ["node_modules", "tmp"]

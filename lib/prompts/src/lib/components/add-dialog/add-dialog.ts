@@ -2,6 +2,7 @@ import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { PromptsService, PromptVariable } from '../../services/prompts.service';
+import { ToastService } from '@web/shared-ui';
 
 @Component({
   selector: 'lib-prompts-add-dialog',
@@ -26,11 +27,14 @@ export class PromptsAddDialogComponent implements OnInit {
   changeLog = 'Initial version';
 
   // Step 3 Fields
-  model = 'Gemini 2.0 Flash';
+  model = 'gemini-2.0-flash';
   maxTokens = 2048;
   temperature = 0.7;
 
-  constructor(private promptsService: PromptsService) {}
+  constructor(
+    private promptsService: PromptsService,
+    private toastService: ToastService
+  ) {}
 
   ngOnInit(): void {}
 
@@ -102,9 +106,16 @@ export class PromptsAddDialogComponent implements OnInit {
       model: this.model,
       maxTokens: this.maxTokens,
       temperature: this.temperature,
+    }).subscribe({
+      next: () => {
+        this.toastService.show('Prompt registered successfully!', 'success');
+        this.close();
+      },
+      error: (err) => {
+        console.error('Failed to register prompt:', err);
+        this.toastService.show('Failed to register prompt. Please check your data.', 'error');
+      }
     });
-
-    this.close();
   }
 
   private resetForm(): void {
@@ -116,7 +127,7 @@ export class PromptsAddDialogComponent implements OnInit {
     this.template = '';
     this.detectedVars = [];
     this.changeLog = 'Initial version';
-    this.model = 'Gemini 2.0 Flash';
+    this.model = 'gemini-2.0-flash';
     this.maxTokens = 2048;
     this.temperature = 0.7;
   }

@@ -4,9 +4,9 @@
   --sidebar-collapsed-width: 78px;
   --bg-sidebar: rgba(10, 15, 30, 0.45);
   --border-sidebar: rgba(255, 255, 255, 0.06);
-  --accent-indigo: #6366f1;
-  --accent-purple: #a855f7;
-  --accent-glow: rgba(99, 102, 241, 0.15);
+  --accent-indigo: #1d684c;
+  --accent-purple: #10b981;
+  --accent-glow: #75fcb91f;
   --text-main: #f1f5f9;
   --text-muted: #64748b;
   --text-hover: #ffffff;
@@ -40,7 +40,7 @@
   flex: 1;
   overflow-y: auto;
   overflow-x: hidden;
-  padding: 20px 14px;
+  padding: 20px 14px 20px 0px;
 }
 
 /* Scrollbar tweaks */
@@ -254,7 +254,7 @@
 
 .submenu-link.active {
   color: var(--text-main);
-  background: rgba(168, 85, 247, 0.08);
+  background: rgba(88, 247, 85, 0.08);
 }
 
 .submenu-link.active .submenu-icon {

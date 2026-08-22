@@ -1,4 +1,4 @@
-<div class="prompt-card">
+<div class="prompt-card" [routerLink]="['/prompts', prompt.id]" style="cursor: pointer;">
   <!-- Top Header Row -->
   <div class="card-header">
     <div class="identity-group">
@@ -11,11 +11,6 @@
 
       <div class="title-badges">
         <h3 class="prompt-title">{{ prompt.name }}</h3>
-        <div class="badges-row">
-          <span class="tag-badge" *ngFor="let t of prompt.tags">
-            {{ t }}
-          </span>
-        </div>
       </div>
     </div>
   </div>
@@ -24,17 +19,11 @@
   <div class="card-body">
     <p class="prompt-description">{{ prompt.description }}</p>
 
-    <!-- Template snippet -->
-    <div class="template-block">
-      <div class="template-header">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="code-icon">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M17.25 6.75 22.5 12l-5.25 5.25m-10.5 0L1.5 12l5.25-5.25m7.5-3-4.5 16.5" />
-        </svg>
-        <span>Template Schema</span>
-      </div>
-      <div class="template-box">
-        <code>{{ prompt.template }}</code>
-      </div>
+    <!-- Tags Row below Description -->
+    <div class="badges-row">
+      <span class="tag-badge" *ngFor="let t of prompt.tags">
+        {{ t }}
+      </span>
     </div>
   </div>
 
@@ -48,11 +37,6 @@
 
     <!-- Right Side Actions & Badges -->
     <div class="footer-right">
-      <!-- Variables Count -->
-      <span class="vars-badge" *ngIf="prompt.variables.length > 0">
-        Vars: {{ prompt.variables.length }}
-      </span>
-
       <!-- Recommended Model -->
       <span class="category-pill" *ngIf="prompt.model">{{ prompt.model }}</span>
     </div>

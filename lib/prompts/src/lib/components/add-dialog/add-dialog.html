@@ -156,11 +156,11 @@
               <!-- Model -->
               <div class="form-group">
                 <label class="form-label" for="prompt-model">Recommended Model</label>
-                <select id="prompt-model" [(ngModel)]="model" class="form-input">
-                  <option value="Gemini 2.0 Flash">Gemini 2.0 Flash</option>
-                  <option value="Gemini 1.5 Pro">Gemini 1.5 Pro</option>
-                  <option value="Gemini 1.5 Flash">Gemini 1.5 Flash</option>
-                </select>
+                <input type="text"
+                       id="prompt-model"
+                       [(ngModel)]="model"
+                       placeholder="e.g. gemini-2.0-flash"
+                       class="form-input" />
               </div>
 
               <!-- Max Tokens -->

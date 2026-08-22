@@ -1,84 +1,254 @@
+/* MCP Server Card Premium Styles */
 .mcp-card {
-  background: rgba(30, 41, 59, 0.25);
+  background: rgba(15, 23, 42, 0.25);
   border: 1px solid rgba(255, 255, 255, 0.05);
-  border-radius: 16px;
-  padding: 24px;
+  border-radius: 18px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   box-sizing: border-box;
   width: 100%;
-  transition: all 0.25s ease;
+  position: relative;
+  overflow: hidden;
 }
+
 .mcp-card:hover {
-  border-color: rgba(168, 85, 247, 0.2);
-  background: rgba(30, 41, 59, 0.35);
-  box-shadow: 0 10px 30px -15px rgba(0, 0, 0, 0.3);
+  transform: translateY(-4px);
+  border-color: rgba(99, 102, 241, 0.25);
+  box-shadow: 0 12px 30px -10px rgba(0, 0, 0, 0.4),
+              0 0 20px rgba(99, 102, 241, 0.05);
+  background: rgba(15, 23, 42, 0.35);
 }
-.mcp-header {
+
+.mcp-card.disconnected-card {
+  border-color: rgba(248, 113, 113, 0.15);
+}
+
+/* Card Header Layout */
+.card-header {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  margin-bottom: 14px;
+  gap: 12px;
 }
-.mcp-name {
-  font-size: 1.1rem;
-  font-weight: 600;
-  color: #f1f5f9;
-  margin: 0 0 4px 0;
+
+.identity-group {
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }
-.mcp-url {
-  font-size: 0.75rem;
-  color: #64748b;
-  font-family: monospace;
-  background: rgba(0, 0, 0, 0.15);
-  padding: 2px 6px;
-  border-radius: 4px;
+
+.node-icon-wrapper {
+  background: rgba(10, 15, 30, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #60a5fa;
+  flex-shrink: 0;
 }
-.status-badge {
-  font-size: 0.7rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  padding: 4px 8px;
-  border-radius: 6px;
-  background: rgba(248, 113, 113, 0.1);
-  color: #f87171;
-  border: 1px solid rgba(248, 113, 113, 0.2);
+
+.node-icon {
+  width: 20px;
+  height: 20px;
 }
-.status-badge.connected {
-  background: rgba(52, 211, 153, 0.1);
-  color: #34d399;
-  border: 1px solid rgba(52, 211, 153, 0.2);
-}
-.mcp-desc {
-  color: #94a3b8;
-  font-size: 0.88rem;
-  line-height: 1.5;
-  margin: 0 0 20px 0;
-}
-.mcp-capabilities {
+
+.title-badges {
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  border-top: 1px solid rgba(255, 255, 255, 0.04);
-  padding-top: 16px;
+  gap: 4px;
 }
-.cap-header {
+
+.mcp-title {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #f1f5f9;
+  margin: 0;
+  letter-spacing: -0.25px;
+}
+
+.badges-row {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.status-badge {
+  font-size: 0.68rem;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 6px;
+}
+
+.status-badge.connected {
+  background: rgba(16, 185, 129, 0.12);
+  border: 1px solid rgba(16, 185, 129, 0.2);
+  color: #34d399;
+}
+
+.status-badge.disconnected {
+  background: rgba(248, 113, 113, 0.12);
+  border: 1px solid rgba(248, 113, 113, 0.2);
+  color: #f87171;
+}
+
+.auth-badge {
+  background: rgba(251, 191, 36, 0.08);
+  border: 1px solid rgba(251, 191, 36, 0.15);
+  color: #fbbf24;
+  font-size: 0.68rem;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 6px;
+}
+
+/* Card Body */
+.card-body {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  flex-grow: 1;
+}
+
+.mcp-description {
+  font-size: 0.85rem;
+  color: #94a3b8;
+  line-height: 1.45;
+  margin: 0;
+}
+
+/* Endpoint URL Panel */
+.url-block {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.url-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
   font-size: 0.78rem;
   font-weight: 600;
   color: #64748b;
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
-.cap-tags {
+
+.link-icon {
+  width: 14px;
+  height: 14px;
+}
+
+.url-box {
+  background: rgba(10, 15, 30, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 0.82rem;
+  color: #e2e8f0;
+  font-family: monospace;
+}
+
+/* Capabilities Bullet Panel */
+.capabilities-block {
+  background: rgba(30, 41, 59, 0.25);
+  border: 1px solid rgba(255, 255, 255, 0.03);
+  border-radius: 12px;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.cap-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.lightning-icon {
+  width: 14px;
+  height: 14px;
+  color: #3b82f6;
+}
+
+.capabilities-bullets {
+  list-style: none;
+  padding: 0;
+  margin: 0;
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: 6px;
 }
-.cap-tag {
-  font-size: 0.75rem;
+
+.cap-bullet-item {
+  background: rgba(59, 130, 246, 0.06);
+  border: 1px solid rgba(59, 130, 246, 0.15);
+  color: #60a5fa;
+  font-size: 0.72rem;
   font-family: monospace;
-  color: #c084fc;
-  background: rgba(168, 85, 247, 0.08);
-  border: 1px solid rgba(168, 85, 247, 0.15);
+  font-weight: 600;
   padding: 3px 8px;
   border-radius: 6px;
+}
+
+/* Card Footer Layout */
+.card-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-top: 1px solid rgba(255, 255, 255, 0.04);
+  padding-top: 14px;
+  margin-top: 4px;
+}
+
+.visibility-status {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.vis-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #94a3b8;
+}
+
+.vis-dot.public {
+  background: #34d399;
+  box-shadow: 0 0 8px rgba(52, 211, 153, 0.5);
+}
+
+.vis-label {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #94a3b8;
+}
+
+.tags-group {
+  display: flex;
+  gap: 6px;
+}
+
+.category-pill {
+  font-size: 0.68rem;
+  font-weight: 700;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  color: #cbd5e1;
+  padding: 2px 10px;
+  border-radius: 20px;
+  letter-spacing: 0.5px;
 }

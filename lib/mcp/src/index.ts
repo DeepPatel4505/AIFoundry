@@ -1,3 +1,3 @@
-export * from './lib/containers/mcp-page/mcp-page';
+export * from './lib/containers/feature-list/feature-list';
 export * from './lib/services/mcp.service';
 

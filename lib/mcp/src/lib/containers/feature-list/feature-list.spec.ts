@@ -1,18 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { McpPageComponent } from './mcp-page';
+import { McpFeatureListComponent } from './feature-list';
 import { McpService } from '../../services/mcp.service';
 
-describe('McpPageComponent', () => {
-  let component: McpPageComponent;
-  let fixture: ComponentFixture<McpPageComponent>;
+describe('McpFeatureListComponent', () => {
+  let component: McpFeatureListComponent;
+  let fixture: ComponentFixture<McpFeatureListComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [McpPageComponent],
+      imports: [McpFeatureListComponent],
       providers: [McpService],
     }).compileComponents();
 
-    fixture = TestBed.createComponent(McpPageComponent);
+    fixture = TestBed.createComponent(McpFeatureListComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

@@ -1,0 +1,69 @@
+<div class="registry-page">
+  <!-- MCP Top Header Area -->
+  <div class="registry-header-row">
+    <div class="title-section">
+      <h1 class="registry-title">MCP Servers</h1>
+      <p class="registry-subtitle">Configure model context protocol connector nodes to expose custom tools</p>
+    </div>
+
+    <!-- Actions Section -->
+    <div class="actions-section">
+      <!-- Refresh Button -->
+      <button class="icon-action-btn" (click)="refreshList()" type="button" aria-label="Refresh MCP List">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="action-icon">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99" />
+        </svg>
+      </button>
+
+      <!-- Export Button -->
+      <button class="icon-action-btn" type="button" aria-label="Export MCP List">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="action-icon">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3" />
+        </svg>
+      </button>
+
+      <!-- Register Button -->
+      <button class="register-main-btn" (click)="openRegisterModal()" type="button">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="plus-icon">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+        </svg>
+        Register Server
+      </button>
+    </div>
+  </div>
+
+  <!-- Filter Panel Component -->
+  <lib-mcp-filter-panel></lib-mcp-filter-panel>
+
+  <!-- Counter Status Bar -->
+  <div class="counter-status-bar" *ngIf="paginationMetadata$ | async as meta">
+    <div class="counter-indicator">
+      <div class="circle-check-wrapper">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="check-icon">
+          <path fill-rule="evenodd" d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12Zm13.36-1.814a.75.75 0 1 0-1.22-.872l-3.236 4.53L9.53 12.22a.75.75 0 0 0-1.06 1.06l2.25 2.25a.75.75 0 0 0 1.14-.094l3.74-5.24Z" clip-rule="evenodd" />
+        </svg>
+      </div>
+      <span class="counter-text">Showing {{ meta.total }} matching servers</span>
+    </div>
+  </div>
+
+  <!-- Cards Grid View -->
+  <div class="mcp-grid">
+    <ng-container *ngFor="let s of servers$ | async">
+      <lib-mcp-card [server]="s"></lib-mcp-card>
+    </ng-container>
+  </div>
+
+  <!-- Pagination Component -->
+  <lib-pagination
+    *ngIf="paginationMetadata$ | async as meta"
+    [currentPage]="meta.page"
+    [pageSize]="meta.limit"
+    [totalItems]="meta.total"
+    (pageChange)="onPageChange($event)"
+    (pageSizeChange)="onPageSizeChange($event)">
+  </lib-pagination>
+
+  <!-- Register Modal Dialog Component -->
+  <lib-mcp-add-dialog #addDialog></lib-mcp-add-dialog>
+</div>

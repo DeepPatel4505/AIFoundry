@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
-import { Observable, BehaviorSubject, combineLatest } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { HttpClient, HttpParams } from '@angular/common/http';
+import { Observable, BehaviorSubject, combineLatest, of } from 'rxjs';
+import { map, switchMap, catchError, shareReplay } from 'rxjs/operators';
 
 export interface PromptVariable {
   name: string;
@@ -25,83 +26,140 @@ export interface PromptTemplate {
   providedIn: 'root',
 })
 export class PromptsService {
-  private initialPrompts: PromptTemplate[] = [
-    {
-      id: 'p1',
-      name: 'Refactoring Advisor',
-      description: 'Checks inputs for code smells, layout issues, and suggests TypeScript improvements.',
-      template: 'Review the following Angular code block. Identify memory leaks, check standalone declarations, and propose modern clean code edits: \n\n{{code}}',
-      tags: ['Development', 'Angular', 'Quality'],
-      isPublic: true,
-      variables: [{ name: 'code', description: 'The TypeScript source code block to review' }],
-      model: 'Gemini 2.0 Flash',
-      maxTokens: 2048,
-      temperature: 0.7,
-    },
-    {
-      id: 'p2',
-      name: 'SQL Schematizer',
-      description: 'Generates robust tables from text specifications.',
-      template: 'Create a PostgreSQL schema from this requirements summary: "{{requirements}}". Ensure foreign key references are correct and indexes are built for high-performance retrieval.',
-      tags: ['Database', 'SQL', 'Structure'],
-      isPublic: true,
-      variables: [{ name: 'requirements', description: 'Feature details for database tables structures' }],
-      model: 'Gemini 1.5 Pro',
-      maxTokens: 4096,
-      temperature: 0.2,
-    },
-  ];
-
-  private promptsSubject = new BehaviorSubject<PromptTemplate[]>(this.initialPrompts);
-  prompts$ = this.promptsSubject.asObservable();
+  private apiUrl = 'http://localhost:3000/api/v1/prompts';
 
   // Filter States
   private searchSubject = new BehaviorSubject<string>('');
   private visibilitySubject = new BehaviorSubject<string>('All');
+  private pageSubject = new BehaviorSubject<number>(1);
+  private limitSubject = new BehaviorSubject<number>(9);
+  private refreshSubject = new BehaviorSubject<void>(undefined);
+
+  paginationMetadata$ = new BehaviorSubject<{ page: number; limit: number; total: number; totalPages: number }>({
+    page: 1,
+    limit: 9,
+    total: 0,
+    totalPages: 0,
+  });
 
   filteredPrompts$: Observable<PromptTemplate[]> = combineLatest([
-    this.prompts$,
     this.searchSubject,
     this.visibilitySubject,
+    this.pageSubject,
+    this.limitSubject,
+    this.refreshSubject,
   ]).pipe(
-    map(([prompts, search, visibility]) => {
-      let filtered = [...prompts];
+    switchMap(([search, visibility, page, limit]) => {
+      let params = new HttpParams()
+        .set('page', page.toString())
+        .set('limit', limit.toString());
 
-      // Search Filter
       if (search.trim()) {
-        const q = search.toLowerCase();
-        filtered = filtered.filter(
-          (p) =>
-            p.name.toLowerCase().includes(q) ||
-            p.description.toLowerCase().includes(q) ||
-            p.tags.some((t) => t.toLowerCase().includes(q))
-        );
+        params = params.set('search', search);
       }
 
-      // Visibility Filter
       if (visibility !== 'All') {
-        const isPublic = visibility === 'Public';
-        filtered = filtered.filter((p) => p.isPublic === isPublic);
+        params = params.set('visibility', visibility.toUpperCase()); // PUBLIC or PRIVATE
       }
 
-      return filtered;
-    })
+      return this.http.get<any>(this.apiUrl, { params }).pipe(
+        map((res) => {
+          if (res && res.success && Array.isArray(res.data)) {
+            if (res.meta) {
+              this.paginationMetadata$.next({
+                page: res.meta.page || page,
+                limit: res.meta.limit || limit,
+                total: res.meta.total || 0,
+                totalPages: res.meta.totalPages || 0,
+              });
+            } else {
+              this.paginationMetadata$.next({
+                page,
+                limit,
+                total: res.data.length,
+                totalPages: 1,
+              });
+            }
+            return res.data.map((item: any) => ({
+              id: item.id,
+              name: item.name,
+              description: item.description || '',
+              template: `(Prompt template content is versioned inside ${item.version || '1.0.0'})`,
+              tags: item.tags || [],
+              isPublic: item.visibility === 'PUBLIC',
+              variables: [], // Variables list is fetched on details view
+              model: item.recommendedModel || '',
+              maxTokens: item.maxTokens || 2048,
+              temperature: item.temperature || 0.7,
+            }));
+          }
+          return [];
+        }),
+        catchError((err) => {
+          console.error('Error fetching prompts from API:', err);
+          return of([]);
+        })
+      );
+    }),
+    shareReplay(1)
   );
+
+  constructor(private http: HttpClient) {}
 
   setSearch(q: string) {
     this.searchSubject.next(q);
+    this.pageSubject.next(1);
   }
 
   setVisibility(visibility: string) {
     this.visibilitySubject.next(visibility);
+    this.pageSubject.next(1);
   }
 
-  addPrompt(newPrompt: Omit<PromptTemplate, 'id'>) {
-    const current = this.promptsSubject.value;
-    const added: PromptTemplate = {
-      ...newPrompt,
-      id: 'p' + (current.length + 1).toString(),
+  setPage(page: number) {
+    this.pageSubject.next(page);
+  }
+
+  setLimit(limit: number) {
+    this.limitSubject.next(limit);
+    this.pageSubject.next(1);
+  }
+
+  refresh(): void {
+    this.refreshSubject.next(undefined);
+  }
+
+  addPrompt(newPrompt: Omit<PromptTemplate, 'id'>): Observable<any> {
+    const payload = {
+      name: newPrompt.name,
+      description: newPrompt.description,
+      visibility: newPrompt.isPublic ? 'PUBLIC' : 'PRIVATE',
+      tags: newPrompt.tags,
+      content: newPrompt.template,
+      variables: newPrompt.variables.map((v) => ({
+        name: v.name,
+        description: v.description,
+        type: 'STRING',
+        required: true,
+      })),
+      recommendedModel: newPrompt.model
+        ? newPrompt.model.toLowerCase().replace(/\s+/g, '-')
+        : 'gemini-2.0-flash',
+      maxTokens: newPrompt.maxTokens,
+      temperature: newPrompt.temperature,
+      changelog: newPrompt.changeLog || 'Initial version',
     };
-    this.promptsSubject.next([added, ...current]);
+
+    return this.http.post<any>(this.apiUrl, payload).pipe(
+      map((res) => {
+        // Trigger list reload after addition
+        this.refresh();
+        return res;
+      })
+    );
+  }
+
+  getPrompt(idOrSlug: string): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}/${idOrSlug}`);
   }
 }

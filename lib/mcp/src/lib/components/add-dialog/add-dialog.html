@@ -1,0 +1,157 @@
+<div class="modal-overlay" *ngIf="isOpen()" (click)="close()">
+  <div class="modal-container" (click)="$event.stopPropagation()">
+    <!-- Header -->
+    <div class="modal-header">
+      <h2 class="modal-title">Register MCP Server</h2>
+      <button class="close-btn" (click)="close()" aria-label="Close dialog" type="button">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="close-icon">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+        </svg>
+      </button>
+    </div>
+
+    <!-- Stepper Indicator -->
+    <div class="stepper-bar">
+      <div class="stepper-indicator" [class.active]="currentStep() === 1" [class.completed]="currentStep() > 1">
+        <div class="indicator-badge">
+          <svg *ngIf="currentStep() > 1" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="3" stroke="currentColor" class="badge-check">
+            <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />
+          </svg>
+          <span *ngIf="currentStep() <= 1">1</span>
+        </div>
+        <span class="indicator-label">Connection</span>
+      </div>
+      <div class="stepper-divider" [class.active]="currentStep() > 1"></div>
+      <div class="stepper-indicator" [class.active]="currentStep() === 2">
+        <div class="indicator-badge">
+          <span>2</span>
+        </div>
+        <span class="indicator-label">Metadata</span>
+      </div>
+    </div>
+
+    <!-- Modal Body -->
+    <div class="modal-body">
+      <!-- STEP 1: Connection Details -->
+      <div class="step-view" *ngIf="currentStep() === 1">
+        <div class="form-grid">
+          <!-- Name -->
+          <div class="form-group">
+            <label class="form-label" for="mcp-name">Server Name *</label>
+            <input type="text" 
+                   id="mcp-name" 
+                   [(ngModel)]="name" 
+                   placeholder="e.g. Local Filesystem MCP" 
+                   class="form-input" 
+                   required 
+                   [disabled]="isConnected()" />
+          </div>
+
+          <!-- URL -->
+          <div class="form-group">
+            <label class="form-label" for="mcp-url">Server Endpoint URL *</label>
+            <input type="url" 
+                   id="mcp-url" 
+                   [(ngModel)]="url" 
+                   placeholder="e.g. localhost:8081/mcp/fs" 
+                   class="form-input" 
+                   required 
+                   [disabled]="isConnected()" />
+          </div>
+
+          <!-- Auth Type -->
+          <div class="form-group">
+            <label class="form-label" for="mcp-auth">Auth Type *</label>
+            <select id="mcp-auth" [(ngModel)]="authType" class="form-input" [disabled]="isConnected()">
+              <option value="None">None</option>
+              <option value="API Key">API Key</option>
+              <option value="Bearer Token">Bearer Token</option>
+              <option value="OAuth2">OAuth2</option>
+            </select>
+          </div>
+
+          <!-- Connection Status Info Banner -->
+          <div class="connection-status-banner" *ngIf="isConnected()">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="status-check-icon">
+              <path fill-rule="evenodd" d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12Zm13.36-1.814a.75.75 0 1 0-1.22-.872l-3.236 4.53L9.53 12.22a.75.75 0 0 0-1.06 1.06l2.25 2.25a.75.75 0 0 0 1.14-.094l3.74-5.24Z" clip-rule="evenodd" />
+            </svg>
+            <span>Connection verified successfully! Server tools and schemas parsed.</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- STEP 2: Metadata Details -->
+      <div class="step-view" *ngIf="currentStep() === 2">
+        <div class="form-grid">
+          <!-- Description -->
+          <div class="form-group">
+            <label class="form-label" for="mcp-desc">Description</label>
+            <textarea id="mcp-desc" 
+                      [(ngModel)]="description" 
+                      placeholder="Describe the capabilities provided by this MCP node..." 
+                      class="form-textarea" 
+                      rows="3"></textarea>
+          </div>
+
+          <!-- Tags -->
+          <div class="form-group">
+            <label class="form-label" for="mcp-tags">Tags (Comma-separated)</label>
+            <input type="text" 
+                   id="mcp-tags" 
+                   [(ngModel)]="tagsInput" 
+                   placeholder="e.g. Database, SQL, Local, API" 
+                   class="form-input" />
+          </div>
+
+          <!-- Visibility -->
+          <div class="form-group">
+            <label class="form-label" for="mcp-visibility">Visibility</label>
+            <select id="mcp-visibility" [(ngModel)]="visibility" class="form-input">
+              <option value="public">Public</option>
+              <option value="private">Private</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer Controls -->
+    <div class="modal-footer">
+      <button class="previous-btn" (click)="prevStep()" *ngIf="currentStep() > 1" type="button">
+        Previous
+      </button>
+
+      <div class="footer-right-actions">
+        <button class="cancel-btn" (click)="close()" type="button">Cancel</button>
+
+        <!-- Step 1 Actions -->
+        <ng-container *ngIf="currentStep() === 1">
+          <!-- Connect Button -->
+          <button class="connect-btn" 
+                  *ngIf="!isConnected()"
+                  (click)="connect()" 
+                  [disabled]="!name.trim() || !url.trim() || isConnecting()" 
+                  type="button">
+            {{ isConnecting() ? 'Connecting...' : 'Connect' }}
+          </button>
+          <!-- Next Button (Active when connected) -->
+          <button class="continue-btn" 
+                  *ngIf="isConnected()"
+                  (click)="nextStep()" 
+                  type="button">
+            Next
+          </button>
+        </ng-container>
+
+        <!-- Step 2 Actions -->
+        <button class="register-btn" 
+                *ngIf="currentStep() === 2"
+                (click)="register()" 
+                [disabled]="!name.trim() || !url.trim()"
+                type="button">
+          Register
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

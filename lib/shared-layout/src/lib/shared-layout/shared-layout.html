@@ -1,4 +1,11 @@
-<lib-shared-header></lib-shared-header>
+<lib-shared-header
+  *ngIf="user$ | async as user"
+  [userName]="user.displayName || user.username"
+  [userRole]="user.role"
+  [userAvatarUrl]="user.avatarUrl || ''"
+  (profileClick)="onProfileClick()"
+  (logoutClick)="onLogoutClick()"
+></lib-shared-header>
 <div class="layout-body">
   <lib-shared-sidebar [isCollapsed]="isSidebarCollapsed" (collapseChange)="onSidebarCollapseChange($event)"></lib-shared-sidebar>
   <main class="layout-main">
@@ -7,5 +14,6 @@
     </div>
   </main>
 </div>
+<lib-toast-container></lib-toast-container>
 
 

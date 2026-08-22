@@ -1,0 +1,75 @@
+<div class="pagination-container" *ngIf="totalPages > 1" (click)="dropdownOpen = false">
+  <!-- Left Side: Range details -->
+  <div class="pagination-info">
+    Showing <span class="highlight">{{ startRange }}</span> - <span class="highlight">{{ endRange }}</span> of <span class="highlight">{{ totalItems }}</span> entries
+  </div>
+
+  <!-- Right Side: Controls -->
+  <div class="pagination-controls">
+    <!-- Page Size Select -->
+    <div class="page-size-selector">
+      <span class="page-size-label">Show</span>
+      <div class="dropdown-wrapper">
+        <button class="dropdown-toggle" (click)="toggleDropdown($event)" type="button">
+          {{ pageSize }}
+          <svg class="dropdown-chevron" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z" clip-rule="evenodd" />
+          </svg>
+        </button>
+        <div class="dropdown-menu" *ngIf="dropdownOpen">
+          <button class="dropdown-item" *ngFor="let size of pageSizeOptions" [class.active]="size === pageSize" (click)="selectPageSize(size)" type="button">
+            {{ size }}
+          </button>
+        </div>
+      </div>
+      <span class="page-size-label">per page</span>
+    </div>
+
+    <!-- Page Buttons -->
+    <div class="pagination-buttons">
+      <!-- First Page -->
+      <button class="pagination-btn first-last" [disabled]="currentPage === 1" (click)="firstPage()" aria-label="First page" type="button">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="chevron-icon">
+          <polyline points="11 17 6 12 11 7"></polyline>
+          <polyline points="18 17 13 12 18 7"></polyline>
+        </svg>
+      </button>
+      
+      <!-- Prev Page -->
+      <button class="pagination-btn prev-next" [disabled]="currentPage === 1" (click)="prevPage()" aria-label="Previous page" type="button">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="chevron-icon">
+          <polyline points="15 18 9 12 15 6"></polyline>
+        </svg>
+      </button>
+
+      <!-- Pages numbers -->
+      <ng-container *ngFor="let p of pages">
+        <button class="pagination-btn page-num" 
+                *ngIf="p !== '...'; else ellipsis"
+                [class.active]="p === currentPage"
+                (click)="selectPage(p)"
+                type="button">
+          {{ p }}
+        </button>
+        <ng-template #ellipsis>
+          <span class="pagination-ellipsis">...</span>
+        </ng-template>
+      </ng-container>
+
+      <!-- Next Page -->
+      <button class="pagination-btn prev-next" [disabled]="currentPage === totalPages" (click)="nextPage()" aria-label="Next page" type="button">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="chevron-icon">
+          <polyline points="9 18 15 12 9 6"></polyline>
+        </svg>
+      </button>
+
+      <!-- Last Page -->
+      <button class="pagination-btn first-last" [disabled]="currentPage === totalPages" (click)="lastPage()" aria-label="Last page" type="button">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="chevron-icon">
+          <polyline points="13 17 18 12 13 7"></polyline>
+          <polyline points="6 17 11 12 6 7"></polyline>
+        </svg>
+      </button>
+    </div>
+  </div>
+</div>

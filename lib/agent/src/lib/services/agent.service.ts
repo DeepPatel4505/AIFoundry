@@ -73,11 +73,13 @@ export class AgentService {
   private agentsSubject = new BehaviorSubject<Agent[]>(this.initialAgents);
   agents$ = this.agentsSubject.asObservable();
 
-  // Filter States
+  // Filter and Pagination States
   private searchSubject = new BehaviorSubject<string>('');
   private statusSubject = new BehaviorSubject<string>('All');
   private visibilitySubject = new BehaviorSubject<string>('All');
   private sortSubject = new BehaviorSubject<string>('Recently Updated');
+  private pageSubject = new BehaviorSubject<number>(1);
+  private limitSubject = new BehaviorSubject<number>(9);
 
   filteredAgents$: Observable<Agent[]> = combineLatest([
     this.agents$,
@@ -130,20 +132,65 @@ export class AgentService {
     })
   );
 
+  paginationMetadata$: Observable<{ page: number; limit: number; total: number; totalPages: number }> = combineLatest([
+    this.filteredAgents$,
+    this.pageSubject,
+    this.limitSubject,
+  ]).pipe(
+    map(([filtered, page, limit]) => {
+      const total = filtered.length;
+      const totalPages = Math.ceil(total / limit) || 1;
+      const activePage = page > totalPages ? totalPages : page;
+      return {
+        page: activePage,
+        limit,
+        total,
+        totalPages,
+      };
+    })
+  );
+
+  paginatedAgents$: Observable<Agent[]> = combineLatest([
+    this.filteredAgents$,
+    this.pageSubject,
+    this.limitSubject,
+  ]).pipe(
+    map(([filtered, page, limit]) => {
+      const total = filtered.length;
+      const totalPages = Math.ceil(total / limit) || 1;
+      const activePage = page > totalPages ? totalPages : page;
+      const start = (activePage - 1) * limit;
+      return filtered.slice(start, start + limit);
+    })
+  );
+
   setSearch(q: string) {
     this.searchSubject.next(q);
+    this.pageSubject.next(1);
   }
 
   setStatus(status: string) {
     this.statusSubject.next(status);
+    this.pageSubject.next(1);
   }
 
   setVisibility(visibility: string) {
     this.visibilitySubject.next(visibility);
+    this.pageSubject.next(1);
   }
 
   setSort(sort: string) {
     this.sortSubject.next(sort);
+    this.pageSubject.next(1);
+  }
+
+  setPage(page: number) {
+    this.pageSubject.next(page);
+  }
+
+  setLimit(limit: number) {
+    this.limitSubject.next(limit);
+    this.pageSubject.next(1);
   }
 
   addAgent(newAgent: Omit<Agent, 'id' | 'lastActive'>) {
@@ -154,5 +201,6 @@ export class AgentService {
       lastActive: 'Just now',
     };
     this.agentsSubject.next([added, ...current]);
+    this.pageSubject.next(1);
   }
 }
