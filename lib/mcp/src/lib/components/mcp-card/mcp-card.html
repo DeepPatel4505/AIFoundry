@@ -1,4 +1,4 @@
-<div class="mcp-card" [class.disconnected-card]="server.status === 'disconnected'">
+<div class="mcp-card" [class.disconnected-card]="server.status === 'disconnected'" [routerLink]="['/mcp', server.id]">
   <!-- Top Header Row -->
   <div class="card-header">
     <div class="identity-group">
@@ -41,7 +41,7 @@
     </div>
 
     <!-- Exposed Tool Schemas (Capabilities) -->
-    <div class="capabilities-block" *ngIf="server.capabilities.length > 0">
+    <div class="capabilities-block" *ngIf="server.capabilities && server.capabilities.length > 0">
       <div class="cap-header">
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="lightning-icon">
           <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75Z" />
@@ -49,7 +49,10 @@
         <span>Exposed Tool Schemas ({{ server.capabilities.length }})</span>
       </div>
       <ul class="capabilities-bullets">
-        <li *ngFor="let cap of server.capabilities" class="cap-bullet-item">{{ cap }}</li>
+        <li *ngFor="let cap of visibleCapabilities" class="cap-bullet-item">{{ cap }}</li>
+        <li *ngIf="remainingCount > 0" class="cap-bullet-item cap-more-badge" [attr.title]="remainingTooltip">
+          +{{ remainingCount }} more
+        </li>
       </ul>
     </div>
   </div>

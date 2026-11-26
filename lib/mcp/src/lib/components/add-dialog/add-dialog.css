@@ -197,18 +197,130 @@
   border-color: rgba(255, 255, 255, 0.04);
 }
 
-/* Connection banner styling */
-.connection-status-banner {
-  background: rgba(52, 211, 153, 0.05);
-  border: 1px solid rgba(52, 211, 153, 0.15);
+.title-draft-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.forget-draft-btn {
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.25);
+  color: #f87171;
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 3px 8px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.forget-draft-btn:hover {
+  background: rgba(239, 68, 68, 0.2);
+  color: #fca5a5;
+}
+
+.field-hint {
+  font-size: 0.72rem;
+  color: #64748b;
+  margin-top: 2px;
+}
+
+/* Connection Error Banner */
+.connection-error-banner {
+  background: rgba(239, 68, 68, 0.08);
+  border: 1px solid rgba(239, 68, 68, 0.25);
   border-radius: 8px;
   padding: 12px 14px;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 10px;
-  color: #34d399;
+  color: #f87171;
   font-size: 0.82rem;
+}
+
+.error-svg {
+  width: 18px;
+  height: 18px;
+  color: #ef4444;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.error-body {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+/* Connection banner styling */
+.connection-status-banner {
+  background: rgba(52, 211, 153, 0.08);
+  border: 1px solid rgba(52, 211, 153, 0.25);
+  border-radius: 10px;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.status-top-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.check-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.status-title {
+  color: #34d399;
+  font-size: 0.88rem;
+  font-weight: 700;
+}
+
+.protocol-chip {
+  font-family: monospace;
+  font-size: 0.72rem;
+  background: rgba(52, 211, 153, 0.15);
+  color: #34d399;
+  padding: 2px 8px;
+  border-radius: 6px;
   font-weight: 600;
+}
+
+.discovery-stats-row {
+  display: flex;
+  gap: 12px;
+}
+
+.stat-item {
+  flex: 1;
+  background: rgba(10, 15, 30, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  padding: 8px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.stat-number {
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: #f1f5f9;
+  font-family: monospace;
+}
+
+.stat-label {
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: #94a3b8;
+  text-transform: uppercase;
 }
 
 .status-check-icon {

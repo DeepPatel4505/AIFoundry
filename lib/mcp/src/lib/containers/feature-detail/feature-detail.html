@@ -1,0 +1,423 @@
+<div class="detail-page-container">
+  <!-- Loading View -->
+  <div class="loading-state" *ngIf="isLoading()">
+    <div class="spinner"></div>
+    <span class="loading-text">Loading MCP server specifications...</span>
+  </div>
+
+  <!-- Error View -->
+  <div class="error-state" *ngIf="!isLoading() && isError()">
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="error-icon">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z" />
+    </svg>
+    <h3>MCP Server not found</h3>
+    <p>The requested model context protocol connector does not exist or has been removed.</p>
+    <button class="back-home-btn" routerLink="/mcp">Back to MCP Servers</button>
+  </div>
+
+  <!-- Main View -->
+  <div class="main-content-view" *ngIf="!isLoading() && !isError() && server() as s">
+    <!-- Breadcrumb back link -->
+    <div class="nav-breadcrumbs">
+      <a routerLink="/mcp" class="back-link">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="back-icon">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18" />
+        </svg>
+        Back to MCP Servers
+      </a>
+    </div>
+
+    <!-- Header Block -->
+    <div class="detail-header-block">
+      <div class="header-main-info">
+        <div class="title-row">
+          <div class="icon-title-group">
+            <div class="mcp-avatar-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="avatar-svg">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M5.25 14.25h13.5m-13.5 0a3 3 0 0 1-3-3V7.5a3 3 0 0 1 3-3h13.5a3 3 0 0 1 3 3v3.75a3 3 0 0 1-3 3M5.25 14.25a3 3 0 1 1 0 6h13.5a3 3 0 1 1 0-6m-9-9h.008v.008H9.75V5.25Zm3 0h.008v.008h-.008V5.25Zm3 0h.008v.008h-.008V5.25Zm-9 11.25h.008v.008H9.75v-.008Zm3 0h.008v.008h-.008v-.008Zm3 0h.008v.008h-.008v-.008Z" />
+              </svg>
+            </div>
+            <div>
+              <h1 class="mcp-title">{{ s.name }}</h1>
+              <div class="badges-row">
+                <span class="status-badge" [class.connected]="s.status === 'connected'" [class.disconnected]="s.status !== 'connected'">
+                  <span class="pulse-dot"></span>
+                  {{ s.status === 'connected' ? 'Connected' : 'Offline' }}
+                </span>
+                <span class="transport-badge">{{ s.transport || 'STREAMABLE_HTTP' }}</span>
+                <span class="auth-badge" *ngIf="s.authType && s.authType !== 'None'">{{ s.authType }}</span>
+                <span class="visibility-badge" [class.public]="s.isPublic">{{ s.isPublic ? 'Public' : 'Private' }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <p class="mcp-description">{{ s.description }}</p>
+      </div>
+
+      <!-- Action Buttons Row -->
+      <div class="header-actions">
+        <!-- Copy Endpoint Button -->
+        <button class="action-btn copy-btn" (click)="copyEndpoint()" type="button" aria-label="Copy Endpoint URL">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="btn-icon">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M13.19 8.688a4.5 4.5 0 0 1 1.242 7.244l-4.5 4.5a4.5 4.5 0 0 1-6.364-6.364l1.757-1.757m13.35-.622 1.757-1.757a4.5 4.5 0 0 0-6.364-6.364l-4.5 4.5a4.5 4.5 0 0 0 1.242 7.244" />
+          </svg>
+          Copy Endpoint
+        </button>
+
+        <!-- Share Button -->
+        <button class="action-btn share-btn" (click)="shareUrl()" type="button" aria-label="Share Link">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="btn-icon">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M7.217 10.907a2.25 2.25 0 1 0 0 2.186m0-2.186c.18.324.283.696.283 1.093s-.103.77-.283 1.093m0-2.186 9.566-5.314m-9.566 7.5 9.566 5.314m0 0a2.25 2.25 0 1 0 3.935 2.186 2.25 2.25 0 0 0-3.935-2.186Zm0-12.814a2.25 2.25 0 1 0 3.933-2.185 2.25 2.25 0 0 0-3.933 2.185Z" />
+          </svg>
+          Share
+        </button>
+
+        <!-- Star Button -->
+        <button class="action-btn star-btn" [class.starred]="isStarred()" (click)="toggleStar()" type="button" aria-label="Star MCP Server">
+          <svg xmlns="http://www.w3.org/2000/svg" [attr.fill]="isStarred() ? 'currentColor' : 'none'" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="btn-icon star-icon">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M11.48 3.499c.15-.357.5-.599.89-.599s.74.242.89.599l2.74 5.59a1 1 0 0 0 .76.59l6.15.89c.39.05.55.54.27.82l-4.45 4.34a1 1 0 0 0-.29.89l1.05 6.13c.07.39-.33.68-.68.49l-5.5-2.89a1 1 0 0 0-.91 0l-5.5 2.89c-.35.19-.75-.1-.68-.49l1.05-6.13a1 1 0 0 0-.29-.89L4.03 12.11c-.28-.28-.12-.77.27-.82l6.15-.89a1 1 0 0 0 .76-.59l2.74-5.59Z" />
+          </svg>
+          {{ starCount() }} Stars
+        </button>
+      </div>
+    </div>
+
+    <!-- Endpoint URL Quick Bar -->
+    <div class="endpoint-quick-bar">
+      <div class="endpoint-info">
+        <span class="endpoint-label">PROTOCOL ENDPOINT</span>
+        <code class="endpoint-code">{{ s.url }}</code>
+      </div>
+      <button class="mini-copy-btn" (click)="copyEndpoint()" type="button" title="Copy endpoint URL">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="copy-svg">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 17.25v3.375c0 .621-.504 1.125-1.125 1.125h-9.75a1.125 1.125 0 0 1-1.125-1.125V7.875c0-.621.504-1.125 1.125-1.125H6.75a9.06 9.06 0 0 1 1.5.124m7.5 10.376h3.375c.621 0 1.125-.504 1.125-1.125V11.25c0-4.46-3.243-8.161-7.5-8.876a9.06 9.06 0 0 0-1.5-.124H9.375c-.621 0-1.125.504-1.125 1.125v3.5m7.5 10.375H9.375a1.125 1.125 0 0 1-1.125-1.125v-9.25m12 6.625v-1.875a3.375 3.375 0 0 0-3.375-3.375h-1.5a1.125 1.125 0 0 1-1.125-1.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H9.75" />
+        </svg>
+      </button>
+    </div>
+
+    <!-- Main Tabs Navigation (IDE Integration vs Tools) -->
+    <div class="tabs-nav-bar">
+      <button class="main-tab-btn" 
+              [class.active]="activeTab() === 'ides'" 
+              (click)="setTab('ides')" 
+              type="button">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="tab-svg">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 7.5l3 2.25-3 2.25m4.5 0h3m-9 8.25h13.5A2.25 2.25 0 0 0 21 18V6a2.25 2.25 0 0 0-2.25-2.25H5.25A2.25 2.25 0 0 0 3 6v12a2.25 2.25 0 0 0 2.25 2.25Z" />
+        </svg>
+        How to Use in IDEs
+      </button>
+      <button class="main-tab-btn" 
+              [class.active]="activeTab() === 'tools'" 
+              (click)="setTab('tools')" 
+              type="button">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="tab-svg">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M11.42 15.17 17.25 21A2.652 2.652 0 0 0 21 17.25l-5.877-5.877M11.42 15.17l2.496-3.03c.317-.384.74-.626 1.208-.766M11.42 15.17l-4.655 5.653a2.548 2.548 0 1 1-3.586-3.586l6.837-5.63m5.108-.233c.55-.164 1.163-.188 1.743-.07a4.5 4.5 0 0 0 4.486-6.32l-3.276 3.277a3.004 3.004 0 0 1-2.25-2.25l3.276-3.276a4.5 4.5 0 0 0-6.32 4.486c.09.52.26 1.02.502 1.48" />
+        </svg>
+        Tools & Capabilities
+        <span class="tab-count-pill">{{ s.tools?.length || s.capabilities.length }}</span>
+      </button>
+    </div>
+
+    <!-- Two-Column Layout for Main Content & Specifications Sidebar -->
+    <div class="detail-split-layout">
+      <!-- Left Column: Tabs Content -->
+      <div class="left-main-content">
+        <!-- TAB 1: IDE INTEGRATION -->
+        <div class="tab-pane-content" *ngIf="activeTab() === 'ides'">
+          <!-- IDE Selector Grid -->
+          <div class="ide-selector-section">
+            <h2 class="section-title">Select your IDE or Agent Client</h2>
+            <p class="section-subtitle">Janus generates ready-to-paste configurations tailored specifically for each development environment.</p>
+
+            <div class="ides-grid">
+              <button *ngFor="let ide of ides" 
+                      class="ide-card-btn" 
+                      [class.active]="selectedIde() === ide.id" 
+                      (click)="selectIde(ide.id)"
+                      type="button">
+                <div class="ide-card-header">
+                  <div class="ide-logo-badge" [attr.data-ide]="ide.id">
+                    <span class="ide-logo-text">{{ ide.name.charAt(0) }}</span>
+                  </div>
+                  <span class="ide-name">{{ ide.name }}</span>
+                </div>
+                <p class="ide-tagline">{{ ide.tagline }}</p>
+                <div class="ide-active-indicator" *ngIf="selectedIde() === ide.id">Active</div>
+              </button>
+            </div>
+          </div>
+
+          <!-- Configuration & Setup Details for Selected IDE -->
+          <div class="ide-details-card">
+            <!-- OS Platform Selector -->
+            <div class="config-top-controls">
+              <div class="config-file-info">
+                <span class="config-label">CONFIG FILE LOCATION</span>
+                <div class="path-display-row">
+                  <code class="file-path-text">{{ getIdeFilePath() }}</code>
+                  <button class="path-copy-btn" (click)="copyFilePath()" type="button" title="Copy configuration file path">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="mini-icon">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 17.25v3.375c0 .621-.504 1.125-1.125 1.125h-9.75a1.125 1.125 0 0 1-1.125-1.125V7.875c0-.621.504-1.125 1.125-1.125H6.75a9.06 9.06 0 0 1 1.5.124m7.5 10.376h3.375c.621 0 1.125-.504 1.125-1.125V11.25c0-4.46-3.243-8.161-7.5-8.876a9.06 9.06 0 0 0-1.5-.124H9.375c-.621 0-1.125.504-1.125 1.125v3.5m7.5 10.375H9.375a1.125 1.125 0 0 1-1.125-1.125v-9.25m12 6.625v-1.875a3.375 3.375 0 0 0-3.375-3.375h-1.5a1.125 1.125 0 0 1-1.125-1.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H9.75" />
+                    </svg>
+                    Copy Path
+                  </button>
+                </div>
+              </div>
+
+              <!-- OS Platform Pills -->
+              <div class="os-switcher">
+                <span class="os-label">OS:</span>
+                <div class="os-pills">
+                  <button class="os-pill" [class.active]="selectedOs() === 'windows'" (click)="selectOs('windows')" type="button">Windows</button>
+                  <button class="os-pill" [class.active]="selectedOs() === 'mac'" (click)="selectOs('mac')" type="button">macOS</button>
+                  <button class="os-pill" [class.active]="selectedOs() === 'linux'" (click)="selectOs('linux')" type="button">Linux</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Configuration Snippet Editor Viewport -->
+            <div class="snippet-editor-box">
+              <div class="editor-header">
+                <div class="editor-title-row">
+                  <span class="editor-dot red"></span>
+                  <span class="editor-dot yellow"></span>
+                  <span class="editor-dot green"></span>
+                  <span class="editor-filename">{{ selectedIde() === 'zed' ? 'settings.json' : 'mcp.json' }}</span>
+                </div>
+                <div class="editor-actions">
+                  <span class="lang-tag">JSON</span>
+                  <button class="copy-snippet-btn" (click)="copyConfig()" type="button">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="snippet-copy-icon">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 17.25v3.375c0 .621-.504 1.125-1.125 1.125h-9.75a1.125 1.125 0 0 1-1.125-1.125V7.875c0-.621.504-1.125 1.125-1.125H6.75a9.06 9.06 0 0 1 1.5.124m7.5 10.376h3.375c.621 0 1.125-.504 1.125-1.125V11.25c0-4.46-3.243-8.161-7.5-8.876a9.06 9.06 0 0 0-1.5-.124H9.375c-.621 0-1.125.504-1.125 1.125v3.5m7.5 10.375H9.375a1.125 1.125 0 0 1-1.125-1.125v-9.25m12 6.625v-1.875a3.375 3.375 0 0 0-3.375-3.375h-1.5a1.125 1.125 0 0 1-1.125-1.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H9.75" />
+                    </svg>
+                    Copy Configuration
+                  </button>
+                </div>
+              </div>
+              <pre class="json-code-viewport"><code>{{ getIdeConfigSnippet() }}</code></pre>
+            </div>
+
+            <!-- Setup Instructions Steps -->
+            <div class="instructions-section">
+              <h3 class="instructions-title">Step-by-Step Setup Guide</h3>
+              <ol class="steps-list">
+                <li *ngFor="let step of getIdeInstructions(); let i = index" class="step-item">
+                  <div class="step-number">{{ i + 1 }}</div>
+                  <div class="step-content">{{ step }}</div>
+                </li>
+              </ol>
+            </div>
+
+            <!-- Client Discovery Pro-Tip -->
+            <div class="discovery-tip-callout">
+              <div class="tip-icon-box">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="tip-svg">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 18v-5.25m0 0a6.002 6.002 0 0 0-5.78-4.228 6 6 0 1 0 11.56 0A6.002 6.002 0 0 0 12 12.75Zm0 0V21m-6-3h12" />
+                </svg>
+              </div>
+              <div class="tip-text">
+                <strong>Protocol Handshake Note:</strong> Once configured, your client automatically performs an MCP <code>initialize</code> handshake with <code>{{ s.name }}</code> to register its capabilities and tool schemas without needing custom plugins.
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB 2: TOOLS & CAPABILITIES -->
+        <div class="tab-pane-content" *ngIf="activeTab() === 'tools'">
+          <!-- Tools Search & Filter Bar -->
+          <div class="tools-filter-bar">
+            <div class="search-input-wrapper">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="search-icon">
+                <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
+              </svg>
+              <input type="text" 
+                     class="tool-search-input" 
+                     placeholder="Filter tools by name, description, or parameter..." 
+                     [ngModel]="toolSearch()" 
+                     (ngModelChange)="toolSearch.set($event)" />
+            </div>
+            <div class="tools-count-badge">
+              <span>{{ filteredTools().length }} {{ filteredTools().length === 1 ? 'tool' : 'tools' }} available</span>
+            </div>
+          </div>
+
+          <!-- Empty Tools State -->
+          <div class="no-tools-state" *ngIf="filteredTools().length === 0">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="empty-icon">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
+            </svg>
+            <p>No tools matched your search query "{{ toolSearch() }}".</p>
+          </div>
+
+          <!-- Tools Cards List -->
+          <div class="tools-list-container" *ngIf="filteredTools().length > 0">
+            <div *ngFor="let tool of filteredTools()" class="tool-spec-card">
+              <!-- Tool Top Header -->
+              <div class="tool-card-header">
+                <div class="tool-identity">
+                  <div class="tool-symbol-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="tool-svg">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75Z" />
+                    </svg>
+                  </div>
+                  <div>
+                    <h3 class="tool-name">{{ tool.name }}</h3>
+                    <span class="tool-returns" *ngIf="tool.returns">Returns: <code>{{ tool.returns }}</code></span>
+                  </div>
+                </div>
+
+                <div class="tool-header-actions">
+                  <button class="mini-action-pill" (click)="copyToolName(tool.name)" type="button" title="Copy tool name">
+                    Copy Name
+                  </button>
+                  <button class="mini-action-pill schema-toggle-pill" 
+                          [class.active]="isSchemaExpanded(tool.name)" 
+                          (click)="toggleSchema(tool.name)" 
+                          type="button">
+                    {{ isSchemaExpanded(tool.name) ? 'Hide Schema' : 'Inspect JSON Schema' }}
+                  </button>
+                </div>
+              </div>
+
+              <!-- Tool Description -->
+              <p class="tool-description-text">{{ tool.description }}</p>
+
+              <!-- Parameters Breakdown Table / Cards -->
+              <div class="parameters-section">
+                <div class="params-header">
+                  <span class="params-title">INPUT PARAMETERS</span>
+                  <span class="params-count">{{ tool.parameters?.length || 0 }} defined</span>
+                </div>
+
+                <div class="params-table-wrapper" *ngIf="tool.parameters && tool.parameters.length > 0; else noParams">
+                  <table class="params-table">
+                    <thead>
+                      <tr>
+                        <th>Parameter</th>
+                        <th>Type</th>
+                        <th>Requirement</th>
+                        <th>Default</th>
+                        <th>Description</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr *ngFor="let param of tool.parameters">
+                        <td class="param-name-cell">
+                          <code>{{ param.name }}</code>
+                        </td>
+                        <td>
+                          <span class="param-type-pill">{{ param.type }}</span>
+                        </td>
+                        <td>
+                          <span class="param-req-badge" [class.required]="param.required">
+                            {{ param.required ? 'Required' : 'Optional' }}
+                          </span>
+                        </td>
+                        <td>
+                          <span class="param-default-val" *ngIf="param.default !== undefined">
+                            <code>{{ param.default }}</code>
+                          </span>
+                          <span class="param-no-default" *ngIf="param.default === undefined">—</span>
+                        </td>
+                        <td class="param-desc-cell">
+                          {{ param.description }}
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+
+                <ng-template #noParams>
+                  <div class="no-params-notice">
+                    <span>This tool takes no required input parameters.</span>
+                  </div>
+                </ng-template>
+              </div>
+
+              <!-- Raw JSON Schema Dropdown Viewport -->
+              <div class="schema-drawer" *ngIf="isSchemaExpanded(tool.name) && tool.inputSchema">
+                <div class="schema-drawer-header">
+                  <span class="schema-drawer-title">JSON SCHEMA DEFINITION (RFC 7628)</span>
+                </div>
+                <pre class="schema-json-viewport"><code>{{ formatJson(tool.inputSchema) }}</code></pre>
+              </div>
+
+              <!-- Sample Invocation Snippet Footer -->
+              <div class="sample-invocation-box" *ngIf="tool.example">
+                <div class="sample-header">
+                  <span class="sample-label">SAMPLE AGENT INVOCATION</span>
+                  <button class="mini-copy-action" (click)="copyToolExample(tool)" type="button">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="mini-icon">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 17.25v3.375c0 .621-.504 1.125-1.125 1.125h-9.75a1.125 1.125 0 0 1-1.125-1.125V7.875c0-.621.504-1.125 1.125-1.125H6.75a9.06 9.06 0 0 1 1.5.124m7.5 10.376h3.375c.621 0 1.125-.504 1.125-1.125V11.25c0-4.46-3.243-8.161-7.5-8.876a9.06 9.06 0 0 0-1.5-.124H9.375c-.621 0-1.125.504-1.125 1.125v3.5m7.5 10.375H9.375a1.125 1.125 0 0 1-1.125-1.125v-9.25m12 6.625v-1.875a3.375 3.375 0 0 0-3.375-3.375h-1.5a1.125 1.125 0 0 1-1.125-1.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H9.75" />
+                    </svg>
+                    Copy Invocation
+                  </button>
+                </div>
+                <pre class="sample-code"><code>{{ formatJson(tool.example) }}</code></pre>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Sidebar: Specifications & Metadata -->
+      <div class="right-sidebar-content">
+        <!-- Server Specifications Card -->
+        <div class="sidebar-card">
+          <h3 class="card-heading">Server Specifications</h3>
+
+          <div class="spec-list">
+            <div class="spec-row">
+              <span class="spec-label">Transport</span>
+              <span class="spec-value mono transport-tag">{{ s.transport || 'STREAMABLE_HTTP' }}</span>
+            </div>
+            <div class="spec-row">
+              <span class="spec-label">Protocol Version</span>
+              <span class="spec-value mono">{{ s.protocolVersion || '2024-11-05' }}</span>
+            </div>
+            <div class="spec-row">
+              <span class="spec-label">Auth Mode</span>
+              <span class="spec-value auth-tag">{{ s.authType || 'None' }}</span>
+            </div>
+            <div class="spec-row">
+              <span class="spec-label">Server Version</span>
+              <span class="spec-value mono">v{{ s.version || '1.0.0' }}</span>
+            </div>
+            <div class="spec-row">
+              <span class="spec-label">Tools Count</span>
+              <span class="spec-value count-tag">{{ s.tools?.length || s.capabilities.length }} tools</span>
+            </div>
+            <div class="spec-row">
+              <span class="spec-label">Audit Status</span>
+              <span class="spec-value status-tag">VERIFIED</span>
+            </div>
+          </div>
+
+          <!-- Documentation / Repository Link -->
+          <div class="sidebar-links-group" *ngIf="s.repositoryUrl || s.documentationUrl">
+            <a *ngIf="s.repositoryUrl" [href]="s.repositoryUrl" target="_blank" rel="noopener noreferrer" class="sidebar-link-btn">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="link-svg">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M17.25 6.75 22.5 12l-5.25 5.25m-10.5 0L1.5 12l5.25-5.25m7.5-3-4.5 16.5" />
+              </svg>
+              View Repository
+            </a>
+            <a *ngIf="s.documentationUrl" [href]="s.documentationUrl" target="_blank" rel="noopener noreferrer" class="sidebar-link-btn">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="link-svg">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 0 0 6 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 0 1 6 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 0 1 6-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0 0 18 18a8.967 8.967 0 0 0-6 2.292m0-14.25v14.25" />
+              </svg>
+              Read Documentation
+            </a>
+          </div>
+        </div>
+
+        <!-- Tags Card -->
+        <div class="sidebar-card" *ngIf="s.tags && s.tags.length > 0">
+          <h3 class="card-heading">Tags</h3>
+          <div class="tag-chips">
+            <span class="tag-chip" *ngFor="let t of s.tags">#{{ t }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -59,10 +59,13 @@ export class AuthService {
       return;
     }
 
-    if (token) {
+    // Immediately restore cached user to prevent any UI flicker
+    const storedUser = this.getStoredUser();
+    if (storedUser) {
+      this.currentUserSubject.next(storedUser);
+    } else if (token) {
       const decoded = this.decodeToken(token);
-      if (decoded && !this.isTokenExpired(decoded)) {
-        // Set temp user from decoded token so UI feels fast/responsive
+      if (decoded) {
         this.currentUserSubject.next({
           id: decoded.id,
           email: decoded.email,
@@ -71,41 +74,53 @@ export class AuthService {
           avatarUrl: decoded.avatarUrl || null,
           role: decoded.role,
         });
+      }
+    }
 
-        // Load full profile
+    if (token) {
+      const decoded = this.decodeToken(token);
+      if (decoded && !this.isTokenExpired(decoded)) {
+        // Valid token: mark initialized immediately so authGuard does not redirect
+        this.sessionInitializedSubject.next(true);
+
+        // Fetch latest profile in background without blocking
         this.fetchCurrentUser().subscribe({
-          next: () => {
+          next: (user) => {
+            if (user) {
+              localStorage.setItem('janus_user', JSON.stringify(user));
+            }
+          },
+          error: (err) => {
+            if (err?.status === 401 && this.getRefreshToken()) {
+              this.refreshAccessToken().subscribe({
+                error: () => this.clearSession(),
+              });
+            }
+          },
+        });
+        return;
+      }
+    }
+
+    // Access token missing or expired: use refresh token
+    if (refreshToken) {
+      this.refreshAccessToken()
+        .pipe(
+          switchMap(() => this.fetchCurrentUser()),
+          catchError(() => of(null))
+        )
+        .subscribe({
+          next: (user) => {
+            if (user) {
+              localStorage.setItem('janus_user', JSON.stringify(user));
+            }
             this.sessionInitializedSubject.next(true);
           },
           error: () => {
-            // Try refreshing if fetch fails
-            this.tryRefreshAndFetch();
-          }
+            this.clearSession();
+            this.sessionInitializedSubject.next(true);
+          },
         });
-      } else {
-        // Token is expired, try to refresh
-        this.tryRefreshAndFetch();
-      }
-    } else {
-      // No access token, but refresh token is present
-      this.tryRefreshAndFetch();
-    }
-  }
-
-  private tryRefreshAndFetch(): void {
-    const refreshToken = this.getRefreshToken();
-    if (refreshToken) {
-      this.refreshAccessToken().pipe(
-        switchMap(() => this.fetchCurrentUser())
-      ).subscribe({
-        next: () => {
-          this.sessionInitializedSubject.next(true);
-        },
-        error: () => {
-          this.clearSession();
-          this.sessionInitializedSubject.next(true);
-        }
-      });
     } else {
       this.clearSession();
       this.sessionInitializedSubject.next(true);
@@ -120,15 +135,27 @@ export class AuthService {
     return localStorage.getItem('janus_refresh_token');
   }
 
+  public getStoredUser(): User | null {
+    try {
+      const data = localStorage.getItem('janus_user');
+      return data ? JSON.parse(data) : null;
+    } catch {
+      return null;
+    }
+  }
+
   private setSession(accessToken: string, refreshToken: string, user: User): void {
     localStorage.setItem('janus_access_token', accessToken);
     localStorage.setItem('janus_refresh_token', refreshToken);
+    localStorage.setItem('janus_user', JSON.stringify(user));
     this.currentUserSubject.next(user);
+    this.sessionInitializedSubject.next(true);
   }
 
   public clearSession(): void {
     localStorage.removeItem('janus_access_token');
     localStorage.removeItem('janus_refresh_token');
+    localStorage.removeItem('janus_user');
     this.currentUserSubject.next(null);
   }
 
@@ -178,12 +205,10 @@ export class AuthService {
       map((res) => {
         if (res && res.success && res.data) {
           this.currentUserSubject.next(res.data);
+          localStorage.setItem('janus_user', JSON.stringify(res.data));
           return res.data;
         }
         throw new Error('Failed to load user profile');
-      }),
-      tap({
-        error: () => this.clearSession()
       })
     );
   }
@@ -214,9 +239,22 @@ export class AuthService {
 
   public isLoggedIn(): boolean {
     const token = this.getAccessToken();
-    if (!token) return false;
-    const decoded = this.decodeToken(token);
-    return decoded ? !this.isTokenExpired(decoded) : false;
+    const refreshToken = this.getRefreshToken();
+    if (!token && !refreshToken) return false;
+
+    if (token) {
+      const decoded = this.decodeToken(token);
+      if (decoded && !this.isTokenExpired(decoded)) {
+        return true;
+      }
+    }
+
+    if (refreshToken) {
+      const decodedRefresh = this.decodeToken(refreshToken);
+      return decodedRefresh ? !this.isTokenExpired(decodedRefresh) : true;
+    }
+
+    return false;
   }
 
   private decodeToken(token: string): any {

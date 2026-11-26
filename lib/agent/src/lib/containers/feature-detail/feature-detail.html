@@ -1,0 +1,447 @@
+<div class="detail-page-container">
+  <!-- Loading View -->
+  <div class="loading-state" *ngIf="isLoading()">
+    <div class="spinner"></div>
+    <span class="loading-text">Loading agent specifications...</span>
+  </div>
+
+  <!-- Error View -->
+  <div class="error-state" *ngIf="!isLoading() && isError()">
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="error-icon">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z" />
+    </svg>
+    <h3>Agent not found</h3>
+    <p>The requested agent does not exist or has been removed from the registry.</p>
+    <button class="back-home-btn" routerLink="/agents">Back to Agents</button>
+  </div>
+
+  <!-- Main View -->
+  <div class="main-content-view" *ngIf="!isLoading() && !isError() && agent() as a">
+    <!-- Breadcrumb back link -->
+    <div class="nav-breadcrumbs">
+      <a routerLink="/agents" class="back-link">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="back-icon">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18" />
+        </svg>
+        Back to Agents
+      </a>
+    </div>
+
+    <!-- Header Block -->
+    <div class="detail-header-block">
+      <div class="header-main-info">
+        <div class="title-row">
+          <div class="icon-title-group">
+            <div class="agent-avatar-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="avatar-svg">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M21 7.5l-9-5.25L3 7.5m18 0l-9 5.25m9-5.25v9l-9 5.25M3 7.5l9 5.25M3 7.5v9l9 5.25" />
+              </svg>
+            </div>
+            <div>
+              <div class="title-with-pill">
+                <h1 class="agent-title">{{ a.name }}</h1>
+                <span class="version-tag" *ngIf="a.version">v{{ a.version }}</span>
+              </div>
+              <div class="badges-row">
+                <span class="status-badge" [class.active]="a.status === 'active'" [class.draft]="a.status === 'draft'" [class.needs_attention]="a.status === 'needs_attention'">
+                  <span class="pulse-dot"></span>
+                  {{ a.status === 'needs_attention' ? 'Attention' : (a.status | titlecase) }}
+                </span>
+                <span class="type-badge">{{ a.agentType }}</span>
+                <span class="protocol-badge" *ngIf="a.protocolVersion">{{ a.protocolVersion }}</span>
+                <span class="auth-badge" *ngIf="a.authMode && a.authMode !== 'None'">{{ a.authMode }}</span>
+                <span class="visibility-badge" [class.public]="a.isPublic">{{ a.isPublic ? 'Public' : 'Private' }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <p class="agent-description">{{ a.description }}</p>
+      </div>
+
+      <!-- Action Buttons Row -->
+      <div class="header-actions">
+        <!-- Copy Endpoint Button -->
+        <button class="action-btn copy-btn" (click)="copyEndpoint()" type="button" aria-label="Copy Endpoint URL" *ngIf="a.agentUrl">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="btn-icon">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M13.19 8.688a4.5 4.5 0 0 1 1.242 7.244l-4.5 4.5a4.5 4.5 0 0 1-6.364-6.364l1.757-1.757m13.35-.622 1.757-1.757a4.5 4.5 0 0 0-6.364-6.364l-4.5 4.5a4.5 4.5 0 0 0 1.242 7.244" />
+          </svg>
+          Copy Endpoint
+        </button>
+
+        <!-- Share Button -->
+        <button class="action-btn share-btn" (click)="shareUrl()" type="button" aria-label="Share Link">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="btn-icon">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M7.217 10.907a2.25 2.25 0 1 0 0 2.186m0-2.186c.18.324.283.696.283 1.093s-.103.77-.283 1.093m0-2.186 9.566-5.314m-9.566 7.5 9.566 5.314m0 0a2.25 2.25 0 1 0 3.935 2.186 2.25 2.25 0 0 0-3.935-2.186Zm0-12.814a2.25 2.25 0 1 0 3.933-2.185 2.25 2.25 0 0 0-3.933 2.185Z" />
+          </svg>
+          Share
+        </button>
+
+        <!-- Star Button -->
+        <button class="action-btn star-btn" [class.starred]="isStarred()" (click)="toggleStar()" type="button" aria-label="Star Agent">
+          <svg xmlns="http://www.w3.org/2000/svg" [attr.fill]="isStarred() ? 'currentColor' : 'none'" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="btn-icon star-icon">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M11.48 3.499c.15-.357.5-.599.89-.599s.74.242.89.599l2.74 5.59a1 1 0 0 0 .76.59l6.15.89c.39.05.55.54.27.82l-4.45 4.34a1 1 0 0 0-.29.89l1.05 6.13c.07.39-.33.68-.68.49l-5.5-2.89a1 1 0 0 0-.91 0l-5.5 2.89c-.35.19-.75-.1-.68-.49l1.05-6.13a1 1 0 0 0-.29-.89L4.03 12.11c-.28-.28-.12-.77.27-.82l6.15-.89a1 1 0 0 0 .76-.59l2.74-5.59Z" />
+          </svg>
+          {{ starCount() }} Stars
+        </button>
+      </div>
+    </div>
+
+    <!-- Endpoint Quick Bar -->
+    <div class="endpoint-quick-bar" *ngIf="a.agentUrl">
+      <div class="endpoint-info">
+        <span class="endpoint-label">INVOCATION ENDPOINT</span>
+        <code class="endpoint-code">{{ a.agentUrl }}</code>
+      </div>
+      <button class="mini-copy-btn" (click)="copyEndpoint()" type="button" title="Copy endpoint URL">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="copy-svg">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 17.25v3.375c0 .621-.504 1.125-1.125 1.125h-9.75a1.125 1.125 0 0 1-1.125-1.125V7.875c0-.621.504-1.125 1.125-1.125H6.75a9.06 9.06 0 0 1 1.5.124m7.5 10.376h3.375c.621 0 1.125-.504 1.125-1.125V11.25c0-4.46-3.243-8.161-7.5-8.876a9.06 9.06 0 0 0-1.5-.124H9.375c-.621 0-1.125.504-1.125 1.125v3.5m7.5 10.375H9.375a1.125 1.125 0 0 1-1.125-1.125v-9.25m12 6.625v-1.875a3.375 3.375 0 0 0-3.375-3.375h-1.5a1.125 1.125 0 0 1-1.125-1.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H9.75" />
+        </svg>
+      </button>
+    </div>
+
+    <!-- Main Navigation Tabs -->
+    <div class="tabs-nav-bar">
+      <button class="main-tab-btn" [class.active]="activeTab() === 'capabilities'" (click)="setTab('capabilities')" type="button">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="tab-icon">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M11.42 15.17 17.25 21A2.652 2.652 0 0 0 21 17.25l-5.877-5.877M11.42 15.17l2.496-3.03c.317-.384.74-.626 1.208-.766M11.42 15.17l-4.655 5.653a2.548 2.548 0 1 1-3.586-3.586l6.837-5.63m5.108-.233c.55-.164 1.163-.188 1.743-.14a4.5 4.5 0 0 0 4.486-6.32l-3.276 3.277a3.004 3.004 0 0 1-2.25-2.25l3.276-3.276a4.5 4.5 0 0 0-6.32 4.486c.049.58.025 1.193-.14 1.743" />
+        </svg>
+        Capabilities & Tools
+        <span class="tab-count-pill">{{ a.capabilities?.length || 0 }}</span>
+      </button>
+
+      <button class="main-tab-btn" [class.active]="activeTab() === 'integration'" (click)="setTab('integration')" type="button">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="tab-icon">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M17.25 6.75 22.5 12l-5.25 5.25m-10.5 0L1.5 12l5.25-5.25m7.5-3-4.5 16.5" />
+        </svg>
+        Integration & SDKs
+      </button>
+
+      <button class="main-tab-btn" [class.active]="activeTab() === 'instructions'" (click)="setTab('instructions')" type="button">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="tab-icon">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
+        </svg>
+        Persona & Instructions
+      </button>
+    </div>
+
+    <!-- Layout Grid: Main Content + Right Sidebar -->
+    <div class="split-detail-layout">
+      <!-- Left Column: Tab Contents -->
+      <div class="tab-content-area">
+
+        <!-- ================= TAB 1: CAPABILITIES ================= -->
+        <div class="capabilities-view" *ngIf="activeTab() === 'capabilities'">
+          <div class="tools-search-bar">
+            <div class="search-input-wrapper">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="search-svg">
+                <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
+              </svg>
+              <input
+                type="text"
+                class="tool-input"
+                placeholder="Filter capabilities by name, description, or parameter..."
+                [ngModel]="capabilitySearch()"
+                (ngModelChange)="capabilitySearch.set($event)"
+              />
+              <button class="clear-search-btn" *ngIf="capabilitySearch()" (click)="capabilitySearch.set('')" type="button">
+                &times;
+              </button>
+            </div>
+            <span class="tools-count-badge">
+              Showing {{ filteredCapabilities().length }} of {{ a.capabilities?.length || 0 }}
+            </span>
+          </div>
+
+          <!-- Empty search result -->
+          <div class="no-tools-found" *ngIf="filteredCapabilities().length === 0">
+            <p>No capabilities match "<strong>{{ capabilitySearch() }}</strong>"</p>
+            <button class="reset-filter-btn" (click)="capabilitySearch.set('')">Reset search</button>
+          </div>
+
+          <!-- Capability Cards List -->
+          <div class="capabilities-list" *ngIf="filteredCapabilities().length > 0">
+            <div class="capability-card" *ngFor="let cap of filteredCapabilities()">
+              <div class="capability-card-header">
+                <div class="capability-title-row">
+                  <div class="cap-name-pill">
+                    <span class="func-prefix">fn</span>
+                    <span class="cap-name">{{ cap.name }}</span>
+                  </div>
+                  <span class="cap-returns" *ngIf="cap.returns">returns: {{ cap.returns }}</span>
+                </div>
+                <button class="cap-example-btn" (click)="toggleExample(cap.name)" type="button">
+                  {{ isExampleExpanded(cap.name) ? 'Hide Payload' : 'View Payload Example' }}
+                </button>
+              </div>
+
+              <p class="capability-description">{{ cap.description }}</p>
+
+              <!-- Parameters Section -->
+              <div class="params-block" *ngIf="cap.parameters && cap.parameters.length > 0">
+                <div class="params-title">PARAMETERS</div>
+                <div class="params-table">
+                  <div class="param-row param-header-row">
+                    <span class="col-name">Name</span>
+                    <span class="col-type">Type</span>
+                    <span class="col-req">Requirement</span>
+                    <span class="col-desc">Description</span>
+                  </div>
+                  <div class="param-row" *ngFor="let p of cap.parameters">
+                    <span class="col-name"><code>{{ p.name }}</code></span>
+                    <span class="col-type"><span class="type-badge-mini">{{ p.type }}</span></span>
+                    <span class="col-req">
+                      <span class="req-badge" [class.required]="p.required">{{ p.required ? 'Required' : 'Optional' }}</span>
+                      <span class="default-badge" *ngIf="p.default !== undefined">def: {{ p.default }}</span>
+                    </span>
+                    <span class="col-desc">{{ p.description }}</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Payload Drawer -->
+              <div class="example-drawer" *ngIf="isExampleExpanded(cap.name)">
+                <div class="drawer-header">
+                  <span class="drawer-label">SAMPLE REQUEST PAYLOAD</span>
+                  <button class="copy-payload-btn" (click)="copyCapabilityPayload(cap)" type="button">
+                    Copy JSON
+                  </button>
+                </div>
+                <pre class="json-code-box"><code>{{ formatJson(getCapabilityPayload(cap)) }}</code></pre>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ================= TAB 2: INTEGRATION & SDKS ================= -->
+        <div class="integration-view" *ngIf="activeTab() === 'integration'">
+          <!-- Language Selector -->
+          <div class="lang-selector-bar">
+            <button class="lang-btn" [class.active]="selectedLang() === 'curl'" (click)="selectLang('curl')" type="button">
+              <span class="lang-dot"></span>
+              cURL / REST
+            </button>
+            <button class="lang-btn" [class.active]="selectedLang() === 'python'" (click)="selectLang('python')" type="button">
+              <span class="lang-dot"></span>
+              Python SDK
+            </button>
+            <button class="lang-btn" [class.active]="selectedLang() === 'typescript'" (click)="selectLang('typescript')" type="button">
+              <span class="lang-dot"></span>
+              TypeScript / Node
+            </button>
+            <button class="lang-btn" [class.active]="selectedLang() === 'a2a'" (click)="selectLang('a2a')" type="button">
+              <span class="lang-dot"></span>
+              A2A Swarm Protocol
+            </button>
+          </div>
+
+          <!-- Code Snippet Container -->
+          <div class="code-viewer-panel">
+            <div class="code-viewer-header">
+              <div class="header-left">
+                <span class="traffic-dot red"></span>
+                <span class="traffic-dot yellow"></span>
+                <span class="traffic-dot green"></span>
+                <span class="code-title">
+                  {{
+                    selectedLang() === 'curl' ? 'Terminal (cURL)' :
+                    selectedLang() === 'python' ? 'agent_client.py' :
+                    selectedLang() === 'typescript' ? 'invoke-agent.ts' :
+                    'a2a_swarm_negotiation.json'
+                  }}
+                </span>
+              </div>
+              <button
+                class="copy-code-btn"
+                (click)="
+                  selectedLang() === 'curl' ? copySnippet(getCurlSnippet(), 'cURL') :
+                  selectedLang() === 'python' ? copySnippet(getPythonSnippet(), 'Python') :
+                  selectedLang() === 'typescript' ? copySnippet(getTypeScriptSnippet(), 'TypeScript') :
+                  copySnippet(getA2aSnippet(), 'A2A Protocol')
+                "
+                type="button"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="btn-icon">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 17.25v3.375c0 .621-.504 1.125-1.125 1.125h-9.75a1.125 1.125 0 0 1-1.125-1.125V7.875c0-.621.504-1.125 1.125-1.125H6.75a9.06 9.06 0 0 1 1.5.124m7.5 10.376h3.375c.621 0 1.125-.504 1.125-1.125V11.25c0-4.46-3.243-8.161-7.5-8.876a9.06 9.06 0 0 0-1.5-.124H9.375c-.621 0-1.125.504-1.125 1.125v3.5m7.5 10.375H9.375a1.125 1.125 0 0 1-1.125-1.125v-9.25m12 6.625v-1.875a3.375 3.375 0 0 0-3.375-3.375h-1.5a1.125 1.125 0 0 1-1.125-1.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H9.75" />
+                </svg>
+                Copy Code
+              </button>
+            </div>
+
+            <!-- Code display -->
+            <pre class="code-pre-box"><code *ngIf="selectedLang() === 'curl'">{{ getCurlSnippet() }}</code><code *ngIf="selectedLang() === 'python'">{{ getPythonSnippet() }}</code><code *ngIf="selectedLang() === 'typescript'">{{ getTypeScriptSnippet() }}</code><code *ngIf="selectedLang() === 'a2a'">{{ getA2aSnippet() }}</code></pre>
+          </div>
+
+          <!-- Expected Response Box -->
+          <div class="expected-output-panel">
+            <div class="expected-header">
+              <span class="expected-badge">EXPECTED JSON-RPC RESPONSE</span>
+              <button class="mini-copy-btn" (click)="copySnippet(getExpectedResponseSnippet(), 'Response')" type="button" title="Copy response JSON">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="copy-svg">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 17.25v3.375c0 .621-.504 1.125-1.125 1.125h-9.75a1.125 1.125 0 0 1-1.125-1.125V7.875c0-.621.504-1.125 1.125-1.125H6.75a9.06 9.06 0 0 1 1.5.124m7.5 10.376h3.375c.621 0 1.125-.504 1.125-1.125V11.25c0-4.46-3.243-8.161-7.5-8.876a9.06 9.06 0 0 0-1.5-.124H9.375c-.621 0-1.125.504-1.125 1.125v3.5m7.5 10.375H9.375a1.125 1.125 0 0 1-1.125-1.125v-9.25m12 6.625v-1.875a3.375 3.375 0 0 0-3.375-3.375h-1.5a1.125 1.125 0 0 1-1.125-1.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H9.75" />
+                </svg>
+              </button>
+            </div>
+            <pre class="json-code-box"><code>{{ getExpectedResponseSnippet() }}</code></pre>
+          </div>
+
+          <!-- Protocol & Auth note -->
+          <div class="auth-notice-card">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="notice-icon">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 1 0-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H6.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z" />
+            </svg>
+            <div>
+              <strong>Secure Invocation Standard</strong>
+              <p>
+                All production requests require valid authorization via <code>{{ a.authMode }}</code>. In A2A swarm meshes,
+                cryptographic signatures negotiate peer trust before executing any high-priority capabilities.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- ================= TAB 3: PERSONA & INSTRUCTIONS ================= -->
+        <div class="instructions-view" *ngIf="activeTab() === 'instructions'">
+          <!-- System Prompt Section -->
+          <div class="prompt-card">
+            <div class="prompt-header">
+              <div class="prompt-title-group">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="prompt-icon">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09ZM18.259 8.715 18 9.75l-.259-1.035a3.375 3.375 0 0 0-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 0 0 2.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 0 0 2.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 0 0-2.456 2.456ZM16.894 20.567 16.5 21.75l-.394-1.183a2.25 2.25 0 0 0-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 0 0 1.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 0 0 1.423 1.423l1.183.394-1.183.394a2.25 2.25 0 0 0-1.423 1.423Z" />
+                </svg>
+                <span>System Instructions & Persona Definition</span>
+              </div>
+              <button class="mini-copy-btn" (click)="copySnippet(a.systemPrompt || '', 'System Prompt')" type="button" title="Copy system prompt">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="copy-svg">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 17.25v3.375c0 .621-.504 1.125-1.125 1.125h-9.75a1.125 1.125 0 0 1-1.125-1.125V7.875c0-.621.504-1.125 1.125-1.125H6.75a9.06 9.06 0 0 1 1.5.124m7.5 10.376h3.375c.621 0 1.125-.504 1.125-1.125V11.25c0-4.46-3.243-8.161-7.5-8.876a9.06 9.06 0 0 0-1.5-.124H9.375c-.621 0-1.125.504-1.125 1.125v3.5m7.5 10.375H9.375a1.125 1.125 0 0 1-1.125-1.125v-9.25m12 6.625v-1.875a3.375 3.375 0 0 0-3.375-3.375h-1.5a1.125 1.125 0 0 1-1.125-1.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H9.75" />
+                </svg>
+              </button>
+            </div>
+            <pre class="prompt-text-box">{{ a.systemPrompt || 'No explicit system prompt registered. Inherits standard Janus autonomous agent directives.' }}</pre>
+          </div>
+
+          <!-- Model Settings & Runtime Configuration -->
+          <div class="model-settings-card" *ngIf="a.modelSettings">
+            <div class="card-subtitle">MODEL RUNTIME CONFIGURATION</div>
+            <div class="settings-grid">
+              <div class="setting-item">
+                <span class="setting-key">Foundation Model</span>
+                <span class="setting-value model-badge">{{ a.modelSettings.recommendedModel }}</span>
+              </div>
+              <div class="setting-item">
+                <span class="setting-key">Temperature</span>
+                <span class="setting-value">{{ a.modelSettings.temperature }}</span>
+              </div>
+              <div class="setting-item">
+                <span class="setting-key">Max Output Tokens</span>
+                <span class="setting-value">{{ a.modelSettings.maxTokens | number }}</span>
+              </div>
+              <div class="setting-item">
+                <span class="setting-key">Context Window</span>
+                <span class="setting-value">{{ (a.modelSettings.contextWindow || 128000) | number }} tokens</span>
+              </div>
+              <div class="setting-item">
+                <span class="setting-key">Response Streaming</span>
+                <span class="setting-value status-pill-active">{{ a.modelSettings.streaming ? 'Enabled' : 'Disabled' }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Right Column: Sidebar Specifications -->
+      <div class="sidebar-spec-area">
+        <!-- Node Spec Card -->
+        <div class="spec-card">
+          <h4 class="spec-title">AGENT SPECIFICATIONS</h4>
+          <dl class="spec-list">
+            <div class="spec-row">
+              <dt>Agent Type</dt>
+              <dd><span class="type-badge">{{ a.agentType }}</span></dd>
+            </div>
+            <div class="spec-row" *ngIf="a.protocolVersion">
+              <dt>Protocol</dt>
+              <dd><code>{{ a.protocolVersion }}</code></dd>
+            </div>
+            <div class="spec-row">
+              <dt>Auth Mode</dt>
+              <dd><span class="auth-pill">{{ a.authMode }}</span></dd>
+            </div>
+            <div class="spec-row">
+              <dt>Status</dt>
+              <dd>
+                <span class="status-indicator-dot" [class.active]="a.status === 'active'"></span>
+                {{ a.status | titlecase }}
+              </dd>
+            </div>
+            <div class="spec-row">
+              <dt>Verification</dt>
+              <dd class="verified-cell">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="shield-icon">
+                  <path fill-rule="evenodd" d="M9.661 2.237a.531.531 0 0 1 .678 0 11.947 11.947 0 0 0 7.078 2.749.5.5 0 0 1 .479.425c.094.525.144 1.07.144 1.625 0 3.82-2.345 7.23-5.801 8.712a.504.504 0 0 1-.402 0C8.345 14.26 6 10.85 6 7.036c0-.554.05-1.1.144-1.624a.5.5 0 0 1 .479-.426 11.948 11.948 0 0 0 7.038-2.749ZM10 11.192l-2.096-2.096a.75.75 0 1 0-1.06 1.06l2.625 2.625a.75.75 0 0 0 1.06 0l4.25-4.25a.75.75 0 0 0-1.06-1.06L10 11.192Z" clip-rule="evenodd" />
+                </svg>
+                Verified Node
+              </dd>
+            </div>
+            <div class="spec-row" *ngIf="a.createdAt">
+              <dt>Registered</dt>
+              <dd>{{ a.createdAt }}</dd>
+            </div>
+            <div class="spec-row">
+              <dt>Last Active</dt>
+              <dd>{{ a.lastActive }}</dd>
+            </div>
+            <div class="spec-row">
+              <dt>Capabilities</dt>
+              <dd>{{ a.capabilities?.length || 0 }} registered</dd>
+            </div>
+          </dl>
+        </div>
+
+        <!-- Version History Card -->
+        <div class="spec-card" *ngIf="a.versions && a.versions.length > 0">
+          <h4 class="spec-title">RELEASE HISTORY</h4>
+          <div class="version-list">
+            <div class="version-entry" *ngFor="let ver of a.versions">
+              <div class="ver-top">
+                <span class="ver-tag">v{{ ver.version }}</span>
+                <span class="ver-latest" *ngIf="ver.isLatest">LATEST</span>
+                <span class="ver-date">{{ ver.releaseDate }}</span>
+              </div>
+              <p class="ver-notes">{{ ver.changelog }}</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- External Links Card -->
+        <div class="spec-card" *ngIf="a.gitRepo || a.docsLink">
+          <h4 class="spec-title">EXTERNAL RESOURCES</h4>
+          <div class="links-vertical">
+            <a *ngIf="a.gitRepo" [href]="a.gitRepo" target="_blank" rel="noopener noreferrer" class="resource-link-btn">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="res-icon">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M14.25 9.75L16.5 12l-2.25 2.25m-4.5 0L7.5 12l2.25-2.25M6 20.25h12A2.25 2.25 0 0 0 20.25 18V6A2.25 2.25 0 0 0 18 3.75H6A2.25 2.25 0 0 0 3.75 6v12A2.25 2.25 0 0 0 6 20.25Z" />
+              </svg>
+              <span>Repository Source</span>
+              <span class="arrow-out">↗</span>
+            </a>
+            <a *ngIf="a.docsLink" [href]="a.docsLink" target="_blank" rel="noopener noreferrer" class="resource-link-btn">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="res-icon">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 0 0 6 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 0 1 6 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 0 1 6-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0 0 18 18a8.967 8.967 0 0 0-6 2.292m0-14.25v14.25" />
+              </svg>
+              <span>Documentation Guide</span>
+              <span class="arrow-out">↗</span>
+            </a>
+          </div>
+        </div>
+
+        <!-- Tags Cloud Card -->
+        <div class="spec-card" *ngIf="a.tags && a.tags.length > 0">
+          <h4 class="spec-title">TAGS & LABELS</h4>
+          <div class="tags-cloud">
+            <span class="tag-chip" *ngFor="let tag of a.tags">{{ tag }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

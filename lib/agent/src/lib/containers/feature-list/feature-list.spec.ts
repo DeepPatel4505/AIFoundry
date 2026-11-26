@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideRouter } from '@angular/router';
 import { FeatureListComponent } from './feature-list';
 import { AgentService } from '../../services/agent.service';
 
@@ -9,7 +10,7 @@ describe('FeatureListComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [FeatureListComponent],
-      providers: [AgentService],
+      providers: [AgentService, provideRouter([])],
     }).compileComponents();
 
     fixture = TestBed.createComponent(FeatureListComponent);

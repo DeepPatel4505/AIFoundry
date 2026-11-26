@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideRouter } from '@angular/router';
 import { McpFeatureListComponent } from './feature-list';
 import { McpService } from '../../services/mcp.service';
 
@@ -9,7 +10,7 @@ describe('McpFeatureListComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [McpFeatureListComponent],
-      providers: [McpService],
+      providers: [McpService, provideRouter([])],
     }).compileComponents();
 
     fixture = TestBed.createComponent(McpFeatureListComponent);

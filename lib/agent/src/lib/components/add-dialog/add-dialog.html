@@ -1,7 +1,11 @@
 <div class="modal-overlay" *ngIf="isOpen()" (click)="close()">
   <div class="modal-container" (click)="$event.stopPropagation()">
+    <!-- Modal Header -->
     <div class="modal-header">
-      <h2 class="modal-title">Register New Agent</h2>
+      <div class="header-titles">
+        <h2 class="modal-title">Register Agent</h2>
+        <p class="modal-subtitle">Provide your agent's endpoint URL. Janus will ping its Agent Card to auto-discover capabilities, models, and metadata.</p>
+      </div>
       <button class="close-btn" (click)="close()" aria-label="Close dialog" type="button">
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="close-icon">
           <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
@@ -9,128 +13,247 @@
       </button>
     </div>
 
+    <!-- Modal Body -->
     <div class="modal-body">
-      <form class="form-grid" #agentForm="ngForm" (ngSubmit)="register()">
+      <!-- Connection Form (Only the essential inputs) -->
+      <form class="connection-form" (ngSubmit)="pingAgent()">
         <!-- Agent Name -->
         <div class="form-group">
-          <label class="form-label" for="agent-name">Agent Name *</label>
-          <input type="text" 
-                 id="agent-name" 
-                 name="name"
-                 [(ngModel)]="name" 
-                 placeholder="e.g. sample agent" 
-                 class="form-input" 
-                 required 
-                 #nameField="ngModel"
-                 [class.invalid]="nameField.invalid && nameField.touched" />
-          <span class="error-text" *ngIf="nameField.invalid && nameField.touched">Name is required.</span>
+          <label class="form-label" for="agentName">
+            <span>Agent Name</span>
+            <span class="optional-hint">(optional — auto-filled on ping)</span>
+          </label>
+          <input
+            type="text"
+            id="agentName"
+            name="name"
+            [(ngModel)]="name"
+            (ngModelChange)="onFieldChange()"
+            placeholder="e.g. Sentinel Security Agent (or discovered on ping)"
+            class="form-input"
+          />
         </div>
 
-        <!-- Agent Type -->
+        <!-- Endpoint URL -->
         <div class="form-group">
-          <label class="form-label" for="agent-type">Agent Type *</label>
-          <select id="agent-type" name="agentType" [(ngModel)]="agentType" class="form-input">
-            <option value="A2A">A2A</option>
-            <option value="Assistant">Assistant</option>
-            <option value="Router">Router</option>
-            <option value="Plugin">Plugin</option>
-          </select>
+          <label class="form-label" for="endpointUrl">
+            <span>Agent Endpoint URL</span>
+            <span class="required-star">*</span>
+          </label>
+          <div class="input-with-action">
+            <input
+              type="url"
+              id="endpointUrl"
+              name="endpointUrl"
+              [(ngModel)]="endpointUrl"
+              (ngModelChange)="onFieldChange()"
+              placeholder="e.g. https://api.agent-mesh.dev/v1/agent"
+              class="form-input"
+              required
+            />
+            <button
+              class="ping-btn"
+              [disabled]="isPinging() || !endpointUrl.trim()"
+              (click)="pingAgent()"
+              type="button"
+            >
+              <span class="spinner-mini" *ngIf="isPinging()"></span>
+              <svg *ngIf="!isPinging()" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="ping-svg">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9.348 14.652a3.75 3.75 0 0 1 0-5.304m5.304 0a3.75 3.75 0 0 1 0 5.304m-7.425 2.122a6.75 6.75 0 0 1 0-9.546m9.546 0a6.75 6.75 0 0 1 0 9.546M5.106 18.894c-3.808-3.808-3.808-9.98 0-13.789m13.788 0c3.808 3.808 3.808 9.981 0 13.79M12 12h.008v.007H12V12Z" />
+              </svg>
+              <span>{{ isPinging() ? 'Pinging...' : 'Ping Agent Card' }}</span>
+            </button>
+          </div>
+
+          <!-- Quick presets -->
+          <div class="preset-links">
+            <span class="preset-label">Quick presets:</span>
+            <button
+              *ngFor="let p of presetUrls"
+              type="button"
+              class="preset-chip"
+              (click)="applyPreset(p.url)"
+            >
+              {{ p.label }}
+            </button>
+          </div>
         </div>
 
-        <!-- Agent Endpoint URL -->
-        <div class="form-group">
-          <label class="form-label" for="agent-url">Agent Endpoint URL</label>
-          <input type="url" 
-                 id="agent-url" 
-                 name="agentUrl"
-                 [(ngModel)]="agentUrl" 
-                 placeholder="e.g. https://api.agent.dev" 
-                 class="form-input"
-                 #urlField="ngModel"
-                 [class.invalid]="urlField.invalid && urlField.touched" />
-          <span class="error-text" *ngIf="urlField.invalid && urlField.touched">Please enter a valid URL.</span>
+        <!-- Auth Mode & Visibility Row -->
+        <div class="form-row-dual">
+          <div class="form-group">
+            <label class="form-label" for="authMode">Authentication Mode</label>
+            <select
+              id="authMode"
+              name="authMode"
+              [(ngModel)]="authMode"
+              (ngModelChange)="onFieldChange()"
+              class="form-select"
+            >
+              <option value="None">None (Unauthenticated)</option>
+              <option value="API Key">API Key</option>
+              <option value="Bearer Token">Bearer Token</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="visibility">Visibility</label>
+            <select
+              id="visibility"
+              name="visibility"
+              [(ngModel)]="visibility"
+              (ngModelChange)="onFieldChange()"
+              class="form-select"
+            >
+              <option value="public">Public (Janus Network)</option>
+              <option value="private">Private (Workspace Only)</option>
+            </select>
+          </div>
         </div>
 
-        <!-- Git Repository -->
-        <div class="form-group">
-          <label class="form-label" for="agent-git">Git Repository URL</label>
-          <input type="url" 
-                 id="agent-git" 
-                 name="gitRepo"
-                 [(ngModel)]="gitRepo" 
-                 placeholder="e.g. https://github.com/user/repo" 
-                 class="form-input"
-                 #gitField="ngModel"
-                 [class.invalid]="gitField.invalid && gitField.touched" />
-          <span class="error-text" *ngIf="gitField.invalid && gitField.touched">Please enter a valid Git URL.</span>
+        <!-- Conditional Credentials Input -->
+        <div class="form-group" *ngIf="authMode === 'API Key'">
+          <label class="form-label" for="apiKey">
+            <span>API Key Header</span>
+            <span class="required-star">*</span>
+          </label>
+          <input
+            type="password"
+            id="apiKey"
+            name="apiKey"
+            [(ngModel)]="apiKey"
+            (ngModelChange)="onFieldChange()"
+            placeholder="janus_live_api_key_..."
+            class="form-input mono"
+          />
         </div>
 
-        <!-- Description -->
-        <div class="form-group full-width">
-          <label class="form-label" for="agent-desc">Description</label>
-          <textarea id="agent-desc" 
-                    name="description"
-                    [(ngModel)]="description" 
-                    placeholder="Briefly describe the agent's responsibilities..." 
-                    class="form-textarea" 
-                    rows="3"></textarea>
-        </div>
-
-        <!-- Auth Modes -->
-        <div class="form-group">
-          <label class="form-label" for="agent-auth">Auth Mode</label>
-          <select id="agent-auth" name="authMode" [(ngModel)]="authMode" class="form-input">
-            <option value="None">None</option>
-            <option value="API Key">API Key</option>
-            <option value="Bearer Token">Bearer Token</option>
-            <option value="OAuth2">OAuth2</option>
-          </select>
-        </div>
-
-        <!-- Visibility (Public / Private) -->
-        <div class="form-group">
-          <label class="form-label" for="agent-visibility">Visibility</label>
-          <select id="agent-visibility" name="visibility" [(ngModel)]="visibility" class="form-input">
-            <option value="public">Public</option>
-            <option value="private">Private</option>
-          </select>
-        </div>
-
-        <!-- Docs Link -->
-        <div class="form-group">
-          <label class="form-label" for="agent-docs">Documentation URL</label>
-          <input type="url" 
-                 id="agent-docs" 
-                 name="docsLink"
-                 [(ngModel)]="docsLink" 
-                 placeholder="e.g. https://docs.agent.dev" 
-                 class="form-input"
-                 #docsField="ngModel"
-                 [class.invalid]="docsField.invalid && docsField.touched" />
-          <span class="error-text" *ngIf="docsField.invalid && docsField.touched">Please enter a valid URL.</span>
-        </div>
-
-        <!-- Tags Input -->
-        <div class="form-group">
-          <label class="form-label" for="agent-tags">Tags (Comma-separated)</label>
-          <input type="text" 
-                 id="agent-tags" 
-                 name="tagsInput"
-                 [(ngModel)]="tagsInput" 
-                 placeholder="e.g. Read File, Code Review" 
-                 class="form-input" />
+        <div class="form-group" *ngIf="authMode === 'Bearer Token'">
+          <label class="form-label" for="token">
+            <span>Bearer Token</span>
+            <span class="required-star">*</span>
+          </label>
+          <input
+            type="password"
+            id="token"
+            name="token"
+            [(ngModel)]="token"
+            (ngModelChange)="onFieldChange()"
+            placeholder="eyJhbGciOi..."
+            class="form-input mono"
+          />
         </div>
       </form>
+
+      <!-- Connection Error Alert -->
+      <div class="ping-error-box" *ngIf="pingError()">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="alert-icon">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z" />
+        </svg>
+        <span>{{ pingError() }}</span>
+      </div>
+
+      <!-- Discovered Agent Card Preview Box -->
+      <div class="discovered-card-wrapper" *ngIf="discoveredCard() as card">
+        <div class="card-status-header">
+          <div class="verified-pill">
+            <span class="green-dot"></span>
+            AGENT CARD VERIFIED & DISCOVERED
+          </div>
+          <span class="protocol-badge">{{ card.protocolVersion }}</span>
+        </div>
+
+        <div class="discovered-body">
+          <!-- Name & Details Row -->
+          <div class="title-edit-row">
+            <div class="name-edit-container">
+              <div class="name-version">
+                <input
+                  type="text"
+                  class="form-input title-input"
+                  [(ngModel)]="name"
+                  (ngModelChange)="onFieldChange()"
+                  placeholder="Agent Name"
+                />
+                <span class="discovered-ver">v{{ card.version }}</span>
+                <span class="type-pill">{{ card.agentType }}</span>
+              </div>
+              <div class="name-helper-row" *ngIf="name && name !== card.name">
+                <span class="discovered-hint">Card default: <strong>{{ card.name }}</strong></span>
+                <button type="button" class="use-discovered-btn" (click)="useDiscoveredName(card.name)">
+                  Reset to card name
+                </button>
+              </div>
+              <p class="discovered-desc" *ngIf="!isEditingDetails()">{{ customDescription || card.description }}</p>
+            </div>
+
+            <!-- Inline Edit Fields if user wants to customize description -->
+            <div class="inline-edit-fields" *ngIf="isEditingDetails()">
+              <textarea
+                class="form-textarea compact"
+                [(ngModel)]="customDescription"
+                rows="2"
+                placeholder="Agent Description"
+              ></textarea>
+            </div>
+
+            <button class="edit-toggle-btn" (click)="toggleEditDetails()" type="button">
+              {{ isEditingDetails() ? 'Done' : 'Edit description' }}
+            </button>
+          </div>
+
+          <!-- Discovered Capabilities Preview -->
+          <div class="discovered-section">
+            <div class="section-label">
+              <span>DISCOVERED CAPABILITIES</span>
+              <span class="count-pill">{{ card.capabilities.length }}</span>
+            </div>
+            <div class="caps-tags-cloud">
+              <span class="cap-chip" *ngFor="let cap of card.capabilities">
+                <span class="fn-marker">fn</span>
+                {{ cap.name }}
+              </span>
+            </div>
+          </div>
+
+          <!-- Model & System Directives Preview -->
+          <div class="meta-preview-grid">
+            <div class="meta-item" *ngIf="card.modelSettings">
+              <span class="meta-label">Model Runtime</span>
+              <span class="meta-val highlight">{{ card.modelSettings.recommendedModel }}</span>
+            </div>
+            <div class="meta-item" *ngIf="card.modelSettings">
+              <span class="meta-label">Temperature</span>
+              <span class="meta-val">{{ card.modelSettings.temperature }}</span>
+            </div>
+            <div class="meta-item" *ngIf="card.tags && card.tags.length > 0">
+              <span class="meta-label">Tags</span>
+              <span class="meta-val">{{ card.tags.slice(0, 3).join(', ') }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
 
+    <!-- Modal Footer -->
     <div class="modal-footer">
-      <button class="cancel-btn" (click)="close()" type="button">Cancel</button>
-      <button class="register-btn" 
-              (click)="register()" 
-              [disabled]="agentForm.invalid || !name.trim()" 
-              type="button">
-        Register Agent
+      <button class="forget-draft-btn" (click)="forgetDraft()" type="button" *ngIf="endpointUrl">
+        Clear
       </button>
+
+      <div class="footer-right">
+        <button class="cancel-btn" (click)="close()" type="button">Cancel</button>
+
+        <button
+          class="register-btn"
+          [disabled]="isRegistering() || !discoveredCard()"
+          (click)="register()"
+          type="button"
+        >
+          <span class="spinner-mini" *ngIf="isRegistering()"></span>
+          <span>{{ isRegistering() ? 'Registering...' : 'Confirm & Register Agent' }}</span>
+        </button>
+      </div>
     </div>
   </div>
 </div>
